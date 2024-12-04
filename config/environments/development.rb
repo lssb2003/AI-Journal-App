@@ -1,0 +1,42 @@
+require "active_support/core_ext/integer/time"
+
+Rails.application.configure do
+  # Development settings
+  config.enable_reloading = true
+  config.eager_load = false
+  config.consider_all_requests_local = true
+  config.server_timing = true
+
+  # Disable caching
+  config.cache_store = :null_store
+  config.action_controller.perform_caching = false
+
+  # Email configuration for password reset
+  config.action_mailer.raise_delivery_errors = true
+  config.action_mailer.perform_caching = false
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = {
+    address: "smtp.gmail.com",
+    port: 587,
+    domain: "gmail.com",  # Add this line
+    user_name: "lssb2003@gmail.com",
+    password: "mstz pshk zmcl jgue",  # Replace with your actual 16-character App Password
+    authentication: "plain",
+    enable_starttls_auto: true
+  }
+  config.action_mailer.default_url_options = { host: "localhost", port: 3001 }
+
+  # Debug settings
+  config.active_record.migration_error = :page_load
+  config.active_record.verbose_query_logs = true
+
+  # CORS for React frontend
+  config.middleware.insert_before 0, Rack::Cors do
+    allow do
+      origins "http://localhost:3000"
+      resource "*",
+        headers: :any,
+        methods: [ :get, :post, :put, :patch, :delete, :options, :head ]
+    end
+  end
+end

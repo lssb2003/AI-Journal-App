@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <h1>Your Temporary Password</h1>
+
+    <p>Hello,</p>
+
+    <p>As requested, we have reset your password. Your temporary password is:</p>
+
+    <p style="font-size: 18px; font-weight: bold; padding: 10px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;">
+      <%= @temp_password %>
+    </p>
+
+    <p>You can use this password to login to your account. After logging in, you can change your password using the 'Change Password' button if you wish.</p>
+
+    <p>If you didn't request this password reset, please ignore this email.</p>
+  </body>
+</html>
