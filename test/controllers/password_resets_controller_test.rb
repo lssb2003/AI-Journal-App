@@ -7,8 +7,10 @@ class PasswordResetsControllerTest < ActionDispatch::IntegrationTest
   end
 
   def generate_token_for(user)
-    JWT.encode({ user_id: user.id }, Rails.application.config.jwt_secret, "HS256")
+    secret = Rails.env.test? ? "test_secret_key" : Rails.application.credentials.secret_key_base
+    JWT.encode({ user_id: user.id }, secret, "HS256")
   end
+
 
 
   test "should get new" do

@@ -1,8 +1,7 @@
 ENV["RAILS_ENV"] ||= "test"
+ENV["JWT_SECRET"] = "test_secret_key" unless Rails.env.production?
 require_relative "../config/environment"
 require "rails/test_help"
-
-Rails.application.credentials.secret_key_base = "test_secret_key" unless Rails.env.production?
 
 module ActiveSupport
   class TestCase
