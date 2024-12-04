@@ -19,8 +19,8 @@ export const sharedStyles = {
     },
     heading: {
       textAlign: 'left',
-      color: '#006D77',
-      fontSize: '24px',
+      color: 'black',
+      fontSize: '20px',
       marginBottom: '20px',
     },
     inputGroup: {

@@ -1,14 +1,13 @@
 require "test_helper"
 
 class PasswordResetsControllerTest < ActionDispatch::IntegrationTest
-  TEST_SECRET = "test_secret_key_123"
   def setup
     @user = users(:one)
     @auth_token = generate_token_for(@user)
   end
 
   def generate_token_for(user)
-    JWT.encode({ user_id: user.id }, "TEST_SECRET", "HS256")
+    JWT.encode({ user_id: user.id }, Rails.application.config.jwt_secret, "HS256")
   end
 
 
