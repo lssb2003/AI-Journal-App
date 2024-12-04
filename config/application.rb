@@ -36,5 +36,6 @@ module JournalApp
     end
 
     config.action_mailer.default_options = { from: "lssb2003@gmail.com" }
+    config.jwt_secret = ENV.fetch("JWT_SECRET") { "default_jwt_secret" }
   end
 end
