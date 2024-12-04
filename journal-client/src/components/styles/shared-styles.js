@@ -19,7 +19,7 @@ export const sharedStyles = {
     },
     heading: {
       textAlign: 'left',
-      color: '#AEC6CF',
+      color: '#006D77',
       fontSize: '24px',
       marginBottom: '20px',
     },

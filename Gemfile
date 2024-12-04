@@ -42,7 +42,8 @@ end
 
 gem "rack-cors"
 gem "bcrypt"
-gem "jwt"
+gem "jwt", "~> 2.5.0"
+
 gem "devise"
 gem "importmap-rails"
 
