@@ -6,9 +6,10 @@ class PasswordResetsControllerTest < ActionDispatch::IntegrationTest
    @auth_token = generate_token_for(@user)
  end
 
- def generate_token_for(user)
-   JWT.encode({ user_id: user.id }, Rails.application.credentials.secret_key_base, "HS256")
- end
+  def generate_token_for(user)
+    JWT.encode({ user_id: user.id }, "test_secret_key", "HS256")
+  end
+
 
  test "should get new" do
    get new_password_reset_path
