@@ -35,7 +35,9 @@ const Login = ({ onLogin }) => {
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.heading}>Login</h2>
+      <h1 style={styles.title}>JotBot</h1>
+      <p style={styles.description}>Your Personal AI Journaling Companion</p>
+      <h3 style={styles.heading}>Login</h3>
       <form onSubmit={handleLogin} style={styles.form}>
         <div style={styles.inputGroup}>
           <label style={styles.label}>Email:</label>

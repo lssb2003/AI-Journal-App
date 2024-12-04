@@ -18,8 +18,8 @@ export const sharedStyles = {
       marginBottom: '20px',
     },
     heading: {
-      textAlign: 'center',
-      color: '#333',
+      textAlign: 'left',
+      color: '#AEC6CF',
       fontSize: '24px',
       marginBottom: '20px',
     },
@@ -99,6 +99,19 @@ export const sharedStyles = {
     errorMessage: {
       backgroundColor: '#f8d7da',
       color: '#721c24',
+    },
+    description: {
+        fontSize: '16px',
+        textAlign: 'center',
+        marginBottom: '20px',
+        color: '#008080',
+    },
+    title: {
+        fontSize: '24px',
+        fontWeight: 'bold',
+        textAlign: 'center',
+        marginBottom: '10px',
+        color: '#003366',
     },
   };
   
