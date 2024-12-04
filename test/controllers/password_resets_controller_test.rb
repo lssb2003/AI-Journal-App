@@ -7,9 +7,9 @@ class PasswordResetsControllerTest < ActionDispatch::IntegrationTest
   end
 
   def generate_token_for(user)
-    secret = "test_secret" # Fixed test secret
-    JWT.encode({ user_id: user.id }, secret, "HS256")
+    JWT.encode({ user_id: user.id }, "test_secret_key_123", "HS256")
   end
+
 
 
 

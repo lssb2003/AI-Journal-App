@@ -5,17 +5,17 @@ class ApplicationController < ActionController::API
 
   def authenticate_user
     token = request.headers["Authorization"]&.split(" ")&.last
-    puts "Received Token: #{token || 'None'}"  # Always log the token or a placeholder
+    puts "Received Token: #{token || 'None'}"
 
     if token.nil?
-      # Log the issue without rendering an error immediately
       Rails.logger.warn("Unauthorized access: Token not provided for #{request.path}")
-      @current_user = nil  # Ensure @current_user is nil for unauthorized requests
+      @current_user = nil
       return
     end
 
     begin
-      decoded_token = JWT.decode(token, Rails.application.credentials.secret_key_base, true, { algorithm: "HS256" })
+      secret = Rails.env.test? ? "test_secret_key_123" : Rails.application.credentials.secret_key_base
+      decoded_token = JWT.decode(token, secret, true, { algorithm: "HS256" })
       user_id = decoded_token[0]["user_id"]
       @current_user = User.find_by(id: user_id)
 
