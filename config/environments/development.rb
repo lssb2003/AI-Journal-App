@@ -15,15 +15,17 @@ Rails.application.configure do
   config.action_mailer.raise_delivery_errors = true
   config.action_mailer.perform_caching = false
   config.action_mailer.delivery_method = :smtp
-  config.action_mailer.smtp_settings = {
+    config.action_mailer.smtp_settings = {
     address: "smtp.gmail.com",
     port: 587,
-    domain: "gmail.com",  # Add this line
-    user_name: "lssb2003@gmail.com",
-    password: "mstz pshk zmcl jgue",  # Replace with your actual 16-character App Password
+    domain: "gmail.com",
+    user_name: ENV["SMTP_USERNAME"],
+    password: ENV["SMTP_PASSWORD"],
     authentication: "plain",
     enable_starttls_auto: true
   }
+
+
   config.action_mailer.default_url_options = { host: "localhost", port: 3001 }
 
   # Debug settings

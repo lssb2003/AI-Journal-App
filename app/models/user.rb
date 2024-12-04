@@ -7,7 +7,6 @@ class User < ApplicationRecord
                    format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :password, presence: true, on: :create
 
-  # Add methods for password reset functionality
   def generate_password_reset_token
     update(
       password_reset_token: SecureRandom.urlsafe_base64,
@@ -15,11 +14,9 @@ class User < ApplicationRecord
     )
   end
 
-
   def password_reset_expired?
     password_reset_sent_at.nil? || password_reset_sent_at < 1.hour.ago
   end
-
 
   def clear_reset_token
     update(

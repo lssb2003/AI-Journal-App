@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import ForgotPassword from './ForgotPassword';
+import LoadingSpinner from '../styles/LoadingSpinner';
 import { sharedStyles, combineStyles } from '../styles/shared-styles';
 
 const Login = ({ onLogin }) => {
@@ -8,9 +9,11 @@ const Login = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       const response = await axios.post('http://localhost:3001/login', {
         email,
@@ -21,6 +24,8 @@ const Login = ({ onLogin }) => {
     } catch (error) {
       console.error('Login failed:', error);
       setMessage('Invalid email or password.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -41,6 +46,7 @@ const Login = ({ onLogin }) => {
             style={styles.input}
             placeholder="Enter your email"
             required
+            disabled={isLoading}
           />
         </div>
         <div style={styles.inputGroup}>
@@ -52,17 +58,23 @@ const Login = ({ onLogin }) => {
             style={styles.input}
             placeholder="Enter your password"
             required
+            disabled={isLoading}
           />
         </div>
         <div style={styles.buttonGroup}>
-          <button type="submit" style={combineStyles(styles.button, styles.primaryButton)}>
-            Login
+          <button 
+            type="submit" 
+            style={combineStyles(styles.button, styles.primaryButton)}
+            disabled={isLoading}
+          >
+            {isLoading ? <LoadingSpinner size="small" /> : 'Login'}
           </button>
         </div>
         <button 
           type="button" 
           style={styles.forgotPasswordButton}
           onClick={() => setShowForgotPassword(true)}
+          disabled={isLoading}
         >
           Forgot Password?
         </button>

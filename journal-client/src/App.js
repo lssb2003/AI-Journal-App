@@ -1,85 +1,9 @@
-// import React, { useState, useEffect } from 'react';
-// import Login from './components/Login';
-// import Register from './components/Register';
-// import JournalList from './components/JournalList';
-
-// function App() {
-//   const [token, setToken] = useState(null); // Token state to manage user login status
-//   const [isRegistering, setIsRegistering] = useState(false); // Toggle registration state
-//   const [loading, setLoading] = useState(true); // Loading state to handle token check delay
-
-//   useEffect(() => {
-//     // Check for token in localStorage when the component mounts
-//     const storedToken = localStorage.getItem('token');
-//     if (storedToken) {
-//       setToken(storedToken); // Set the token if found
-//     }
-//     setLoading(false); // Once token is checked, set loading to false
-//   }, []);
-
-//   // Logout function to clear token and reset state
-//   const handleLogout = () => {
-//     setToken(null); // Clear token state
-//     localStorage.removeItem('token'); // Remove token from localStorage
-//   };
-
-//   // Show loading screen if loading is true
-//   if (loading) {
-//     return <div>Loading...</div>;
-//   }
-
-//   return (
-//     <div>
-//       {token ? (
-//         // Render journal list and logout button if the user is authenticated
-//         <>
-//           <JournalList token={token} />
-//           <button onClick={handleLogout} style={styles.logoutButton}>
-//             Logout
-//           </button>
-//         </>
-//       ) : isRegistering ? (
-//         // Show registration form if registering is true
-//         <>
-//           <Register onRegister={() => setIsRegistering(false)} />
-//           <button onClick={() => setIsRegistering(false)}>
-//             Already have an account? Login
-//           </button>
-//         </>
-//       ) : (
-//         // Show login form if no token and not registering
-//         <>
-//           <Login onLogin={(newToken) => { setToken(newToken); localStorage.setItem('token', newToken); }} />
-//           <button onClick={() => setIsRegistering(true)}>
-//             New here? Register
-//           </button>
-//         </>
-//       )}
-//     </div>
-//   );
-// }
-
-// // Basic styles for the logout button
-// const styles = {
-//   logoutButton: {
-//     marginTop: '10px',
-//     padding: '10px 20px',
-//     backgroundColor: '#f44',
-//     color: '#fff',
-//     border: 'none',
-//     borderRadius: '5px',
-//     cursor: 'pointer',
-//     fontWeight: 'bold',
-//   },
-// };
-
-// export default App;
-
 import React, { useState, useEffect } from 'react';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import JournalList from './components/journal/JournalList';
 import ResetPassword from './components/auth/ResetPassword';
+import LoadingSpinner from './components/styles/LoadingSpinner';
 import { sharedStyles, combineStyles } from './components/styles/shared-styles';
 
 function App() {
@@ -114,7 +38,11 @@ function App() {
   };
 
   if (loading) {
-    return <div style={styles.loadingContainer}>Loading...</div>;
+    return (
+      <div style={styles.loadingContainer}>
+        <LoadingSpinner size="large" />
+      </div>
+    );
   }
 
   return (

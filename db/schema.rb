@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_12_04_103514) do
+ActiveRecord::Schema[7.2].define(version: 2024_12_04_140151) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -31,7 +31,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_04_103514) do
     t.string "password_reset_token"
     t.datetime "password_reset_sent_at"
     t.index ["email"], name: "index_users_on_email", unique: true
-    t.index ["password_reset_token"], name: "index_users_on_password_reset_token", unique: true, where: "(password_reset_token IS NOT NULL)"
+    t.index ["password_reset_token"], name: "index_users_on_password_reset_token"
   end
 
   add_foreign_key "journal_entries", "users"
