@@ -44,12 +44,17 @@ jobs:
       postgres:
         image: postgres
         env:
-          POSTGRES_USER: journal_user
-          POSTGRES_PASSWORD: Taekwondo12345@
-          POSTGRES_DB: journal_app_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
         ports:
           - 5432:5432
         options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
+
+      # redis:
+      #   image: redis
+      #   ports:
+      #     - 6379:6379
+      #   options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
       - name: Install packages
@@ -64,20 +69,12 @@ jobs:
           ruby-version: .ruby-version
           bundler-cache: true
 
-      - name: Install dependencies
-        run: |
-          bundle install
-          # Set up the database before running tests
-          bundle exec rake db:create RAILS_ENV=test
-          bundle exec rake db:schema:load RAILS_ENV=test
-          bundle exec rake db:fixtures:load RAILS_ENV=test
-
       - name: Run tests
         env:
           RAILS_ENV: test
-          DATABASE_URL: postgres://journal_user:Taekwondo12345@localhost:5432/journal_app_test
-          RAILS_LOG_TO_STDOUT: true
-        run: bin/rails test
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432
+          # REDIS_URL: redis://localhost:6379/0
+        run: bin/rails db:test:prepare test test:system
 
       - name: Keep screenshots from failed system tests
         uses: actions/upload-artifact@v4
@@ -86,4 +83,3 @@ jobs:
           name: screenshots
           path: ${{ github.workspace }}/tmp/screenshots
           if-no-files-found: ignore
-
