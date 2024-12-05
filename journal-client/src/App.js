@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import JournalList from './components/journal/JournalList';
@@ -6,23 +7,39 @@ import ResetPassword from './components/auth/ResetPassword';
 import LoadingSpinner from './components/styles/LoadingSpinner';
 import { sharedStyles, combineStyles } from './components/styles/shared-styles';
 
+// Configure axios defaults
+axios.defaults.withCredentials = true;
+axios.defaults.baseURL = 'http://localhost:3001';
+axios.defaults.headers.common['Accept'] = 'application/json';
+axios.defaults.headers.common['Content-Type'] = 'application/json';
+
 function App() {
-  const [token, setToken] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showResetPassword, setShowResetPassword] = useState(false);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    if (storedToken) {
-      setToken(storedToken);
-    }
-    setLoading(false);
+    const checkAuth = async () => {
+      try {
+        const response = await axios.get('/auth_check');
+        setIsAuthenticated(response.data.authenticated);
+      } catch (error) {
+        setIsAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkAuth();
   }, []);
 
-  const handleLogout = () => {
-    setToken(null);
-    localStorage.removeItem('token');
+  const handleLogout = async () => {
+    try {
+      await axios.post('/logout');
+      setIsAuthenticated(false);
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   const handleResetPassword = () => {
@@ -47,16 +64,15 @@ function App() {
 
   return (
     <div style={styles.appContainer}>
-      {token ? (
+      {isAuthenticated ? (
         showResetPassword ? (
           <ResetPassword 
-            token={token} 
             onPasswordReset={handlePasswordResetComplete}
             onBackToJournal={handleBackToJournal}
           />
         ) : (
           <div style={styles.journalContainer}>
-            <JournalList token={token} />
+            <JournalList />
             <div style={styles.buttonContainer}>
               <button 
                 onClick={handleResetPassword} 
@@ -85,10 +101,7 @@ function App() {
         </div>
       ) : (
         <div style={styles.authContainer}>
-          <Login onLogin={(newToken) => { 
-            setToken(newToken); 
-            localStorage.setItem('token', newToken); 
-          }} />
+          <Login onLogin={() => setIsAuthenticated(true)} />
           <button 
             onClick={() => setIsRegistering(true)}
             style={combineStyles(styles.button, styles.linkButton, styles.switchAuthButton)}

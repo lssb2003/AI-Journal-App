@@ -10,7 +10,7 @@ const ForgotPassword = ({ onBackToLogin }) => {
   const handleForgotPassword = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3001/password_resets', { email });
+      const response = await axios.post('/password_resets', { email });
       setMessage(response.data.message);
       setError('');
       setTimeout(() => {

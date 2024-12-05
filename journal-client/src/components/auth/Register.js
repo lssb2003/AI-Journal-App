@@ -10,16 +10,21 @@ function Register({ onRegister }) {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:3001/users', {
+      const response = await axios.post('/users', {
         user: {
           username,
           password,
-        },
+        }
       });
-      setMessage('Registration successful! Please log in.');
-      onRegister();
+      
+      console.log('Registration response:', response);  // Add this for debugging
+      
+      if (response.data.message) {
+        setMessage('Registration successful! Please log in.');
+        onRegister();
+      }
     } catch (error) {
-      console.error('Registration failed:', error);
+      console.error('Registration error details:', error.response || error);  // Enhanced error logging
       if (error.response?.data?.errors) {
         setMessage('Error: ' + error.response.data.errors.join(', '));
       } else {
@@ -79,12 +84,11 @@ const styles = {
   ...sharedStyles,
   container: {
     ...sharedStyles.container,
-    maxWidth: '500px', // Slightly wider than login for better spacing
+    maxWidth: '500px',
   },
 };
 
 export default Register;
-
 
 
 

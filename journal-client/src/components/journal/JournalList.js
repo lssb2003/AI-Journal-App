@@ -2,23 +2,15 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { sharedStyles, combineStyles } from '../styles/shared-styles';
 
-function JournalList({ token }) {
+function JournalList() {
   const [entries, setEntries] = useState([]);
   const [newEntry, setNewEntry] = useState({ title: '', content: '' });
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
 
   const fetchEntries = async () => {
-    if (!token) {
-      setMessage('No token found, please log in');
-      setMessageType('error');
-      return;
-    }
-  
     try {
-      const response = await axios.get('http://localhost:3001/journal_entries', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get('/journal_entries');
       setEntries(response.data);
     } catch (error) {
       console.error('Failed to fetch entries:', error);
@@ -32,11 +24,8 @@ function JournalList({ token }) {
   
     try {
       const response = await axios.post(
-        'http://localhost:3001/journal_entries',
-        { journal_entry: newEntry },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        '/journal_entries',
+        { journal_entry: newEntry }
       );
   
       setEntries((prevEntries) => [response.data, ...prevEntries]);
@@ -52,10 +41,7 @@ function JournalList({ token }) {
 
   const deleteEntry = async (id) => {
     try {
-      await axios.delete(`http://localhost:3001/journal_entries/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
+      await axios.delete(`/journal_entries/${id}`);
       setEntries((prevEntries) => prevEntries.filter((entry) => entry.id !== id));
       setMessage('Journal entry deleted successfully!');
       setMessageType('success');
@@ -67,10 +53,8 @@ function JournalList({ token }) {
   };
 
   useEffect(() => {
-    if (token) {
-      fetchEntries();
-    }
-  }, [token]);
+    fetchEntries();
+  }, []);
 
   return (
     <div style={styles.container}>

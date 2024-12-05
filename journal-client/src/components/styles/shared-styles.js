@@ -19,8 +19,8 @@ export const sharedStyles = {
     },
     heading: {
       textAlign: 'left',
-      color: 'black',
-      fontSize: '20px',
+      color: '#333333',
+      fontSize: '16px',
       marginBottom: '20px',
     },
     inputGroup: {
@@ -107,7 +107,7 @@ export const sharedStyles = {
         color: '#008080',
     },
     title: {
-        fontSize: '24px',
+        fontSize: '40px',
         fontWeight: 'bold',
         textAlign: 'center',
         marginBottom: '10px',

@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { sharedStyles, combineStyles } from '../styles/shared-styles';
 
-const ResetPassword = ({ token, onPasswordReset, onBackToJournal }) => {
+const ResetPassword = ({ onPasswordReset, onBackToJournal }) => {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
-  const [messageType, setMessageType] = useState(''); // 'success' or 'error'
+  const [messageType, setMessageType] = useState('');
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
@@ -19,16 +19,10 @@ const ResetPassword = ({ token, onPasswordReset, onBackToJournal }) => {
     }
 
     try {
-      await axios.post(
-        'http://localhost:3001/change_password', 
-        { 
-          current_password: currentPassword, 
-          new_password: newPassword 
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+      await axios.post('/change_password', { 
+        current_password: currentPassword, 
+        new_password: newPassword 
+      });
       setMessage('Password reset successfully');
       setMessageType('success');
       setTimeout(() => {
