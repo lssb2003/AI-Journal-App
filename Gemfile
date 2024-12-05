@@ -42,7 +42,6 @@ end
 
 gem "rack-cors"
 gem "bcrypt"
-gem "jwt", "~> 2.9.3"
 
 
 gem "devise"
