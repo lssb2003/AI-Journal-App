@@ -38,52 +38,51 @@ jobs:
         run: bin/rubocop -f github
 
   test:
-  runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Fix indentation here
 
-  services:
-    postgres:
-      image: postgres
-      env:
-        POSTGRES_USER: journal_user
-        POSTGRES_PASSWORD: Taekwondo12345@
-        POSTGRES_DB: journal_app_test
-      ports:
-        - 5432:5432
-      options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: journal_user
+          POSTGRES_PASSWORD: Taekwondo12345@
+          POSTGRES_DB: journal_app_test
+        ports:
+          - 5432:5432
+        options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
 
-  steps:
-    - name: Install packages
-      run: sudo apt-get update && sudo apt-get install --no-install-recommends -y google-chrome-stable curl libjemalloc2 libvips postgresql-client
+    steps:  # Corrected indentation for steps
+      - name: Install packages
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y google-chrome-stable curl libjemalloc2 libvips postgresql-client
 
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: .ruby-version
-        bundler-cache: true
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
 
-    - name: Install dependencies
-      run: |
-        bundle install
-        # Set up the database before running tests
-        bundle exec rake db:create RAILS_ENV=test
-        bundle exec rake db:schema:load RAILS_ENV=test
-        bundle exec rake db:fixtures:load RAILS_ENV=test
+      - name: Install dependencies
+        run: |
+          bundle install
+          # Set up the database before running tests
+          bundle exec rake db:create RAILS_ENV=test
+          bundle exec rake db:schema:load RAILS_ENV=test
+          bundle exec rake db:fixtures:load RAILS_ENV=test
 
-    - name: Run tests
-      env:
-        RAILS_ENV: test
-        DATABASE_URL: postgres://journal_user:Taekwondo12345@localhost:5432/journal_app_test
-        RAILS_LOG_TO_STDOUT: true
-      run: bin/rails test
+      - name: Run tests
+        env:
+          RAILS_ENV: test
+          DATABASE_URL: postgres://journal_user:Taekwondo12345@localhost:5432/journal_app_test
+          RAILS_LOG_TO_STDOUT: true
+        run: bin/rails test
 
-    - name: Keep screenshots from failed system tests
-      uses: actions/upload-artifact@v4
-      if: failure()
-      with:
-        name: screenshots
-        path: ${{ github.workspace }}/tmp/screenshots
-        if-no-files-found: ignore
-
+      - name: Keep screenshots from failed system tests
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: screenshots
+          path: ${{ github.workspace }}/tmp/screenshots
+          if-no-files-found: ignore
