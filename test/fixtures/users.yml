@@ -3,9 +3,8 @@
 one:
   email: test@example.com
   password_digest: <%= BCrypt::Password.create('password123') %>
-  password_reset_token: nil
-  password_reset_sent_at: nil
-
+  password_reset_token: <%= SecureRandom.hex(10) %>
+  password_reset_sent_at: <%= Time.now %>
 two:
   email: test2@example.com
   password_digest: <%= BCrypt::Password.create('password123') %>

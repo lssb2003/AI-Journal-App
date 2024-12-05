@@ -3,11 +3,13 @@ require "test_helper"
 class PasswordResetsControllerTest < ActionDispatch::IntegrationTest
   def setup
     @user = users(:one)
+    @user.update(password_reset_token: SecureRandom.hex(10), password_reset_sent_at: Time.now)
     sign_in(@user)
   end
 
   def sign_in(user)
-    post login_path, params: { email: user.email, password: "password" }
+    post login_path, params: { email: user.email, password: "password123" }
+    @auth_token = JSON.parse(response.body)["auth_token"]
   end
 
   test "should get new" do
@@ -27,8 +29,10 @@ class PasswordResetsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should get update" do
-    patch password_reset_path(@user.password_reset_token),
-      params: { current_password: "password", new_password: "new123" }
-    assert_response :success
-  end
+  @user.update(password_reset_token: "valid_token", password_reset_sent_at: Time.now)
+  patch password_reset_path(@user.password_reset_token),
+    params: { current_password: "password123", new_password: "new123" },
+    headers: { Authorization: "Bearer #{@auth_token}" }
+  assert_response :success
+end
 end

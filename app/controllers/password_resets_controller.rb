@@ -33,7 +33,9 @@ class PasswordResetsController < ApplicationController
   end
 
   def update
-    if @current_user&.authenticate(params[:current_password])
+    return render json: { error: "Unauthorized" }, status: :unauthorized unless @current_user
+
+    if @current_user.authenticate(params[:current_password])
       if @current_user.update(password: params[:new_password])
         render json: { message: "Password updated" }
       else
