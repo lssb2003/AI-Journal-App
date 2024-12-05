@@ -112,6 +112,7 @@ export const sharedStyles = {
         textAlign: 'center',
         marginBottom: '10px',
         color: '#003366',
+        fontFamily: "'Dancing Script', cursive",
     },
   };
   

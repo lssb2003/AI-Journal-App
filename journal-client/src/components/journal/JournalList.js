@@ -58,7 +58,7 @@ function JournalList() {
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.heading}>Your Journal</h2>
+      <h2 style={styles.title}>Your Journal</h2>
 
       {message && (
         <p style={combineStyles(

@@ -73,12 +73,10 @@ class SessionsController < ApplicationController
   end
 
   def auth_check
-    if current_user
-      render json: { authenticated: true }, status: :ok
-    else
-      render json: { authenticated: false }, status: :unauthorized
-    end
+    response = { authenticated: !!current_user }
+    render json: response, status: :ok
   end
+
 
   def forgot_password
     user = User.find_by(email: params[:email])
