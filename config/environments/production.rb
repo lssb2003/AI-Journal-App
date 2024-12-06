@@ -21,7 +21,7 @@ Rails.application.configure do
     enable_starttls_auto: true
   }
   config.action_mailer.default_url_options = {
-    host: ENV["PRODUCTION_HOST"],   # This will be your deployed backend URL
+    host: ENV["PRODUCTION_HOST"] || "localhost:3000",   # This will be your deployed backend URL
     protocol: "https"
   }
 
