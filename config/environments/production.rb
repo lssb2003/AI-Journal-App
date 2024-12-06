@@ -33,7 +33,7 @@ Rails.application.configure do
   # CORS for production frontend
   config.middleware.insert_before 0, Rack::Cors do
     allow do
-      origins "your-frontend-domain.com"  # Replace with your frontend domain
+      origins ENV["FRONTEND_URL"] || "http://localhost:3000"  # Replace with your frontend domain
       resource "*",
         headers: :any,
         methods: [ :get, :post, :put, :patch, :delete, :options, :head ]
