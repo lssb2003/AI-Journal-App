@@ -94,13 +94,14 @@ npm start
 
 ### Backend (.env.production)
 ```
+# Production Environment Variables
 RAILS_ENV=production
-RAILS_MASTER_KEY=458768c5ad139e9b177a869d3540e31d
-DATABASE_URL=postgres://journal_user:Taekwondo12345@@localhost/journal_app_production
-SMTP_USERNAME=lssb2003@gmail.com
-SMTP_PASSWORD=your-gmail-app-password
+RAILS_MASTER_KEY=your_master_key
+DATABASE_URL=postgres://username:password@localhost/database_name
+SMTP_USERNAME=your_gmail_address
+SMTP_PASSWORD=your_gmail_app_password
 RAILS_SERVE_STATIC_FILES=true
-OPENAI_API_KEY=your-openai-api-key
+OPENAI_API_KEY=your_openai_api_key
 ```
 
 ### Frontend (.env.production)
