@@ -75,7 +75,7 @@ class JournalEntriesController < ApplicationController
     body = {
       model: "gpt-3.5-turbo",  # Use the chat model (e.g., gpt-3.5-turbo)
       messages: [
-        { role: "system", content: "You are a helpful journal entry assistant." },
+        { role: "system", content: "You are a helpful journal entry assistant. When enhancing entries, do not account for the date." },
         { role: "user", content: "Enhance this journal entry:\n\n#{content}" }
       ],
       max_tokens: 150,
