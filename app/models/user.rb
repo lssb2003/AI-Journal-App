@@ -1,9 +1,12 @@
 class User < ApplicationRecord
+  # Add these two lines at the top
+  before_save { self.email = email.downcase }
+
   has_many :journal_entries
   has_secure_password
 
   validates :email, presence: true,
-                   uniqueness: true,
+                   uniqueness: { case_sensitive: false },  # Change this line
                    format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :password, presence: true, on: :create
 

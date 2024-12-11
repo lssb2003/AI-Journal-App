@@ -58,7 +58,7 @@ class SessionsController < ApplicationController
   skip_before_action :authenticate_user, only: [ :login, :forgot_password, :auth_check ]
 
   def login
-    user = User.find_by(email: params[:email])
+    user = User.find_by("lower(email) = ?", params[:email].downcase)
     if user&.authenticate(params[:password])
       sign_in(user)
       render json: { message: "Logged in successfully" }
@@ -79,7 +79,7 @@ class SessionsController < ApplicationController
 
 
   def forgot_password
-    user = User.find_by(email: params[:email])
+    user = User.find_by("lower(email) = ?", params[:email].downcase)
     if user
       reset_token = SecureRandom.urlsafe_base64
       reset_token_expires_at = 1.hour.from_now

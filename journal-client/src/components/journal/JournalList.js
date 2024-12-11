@@ -51,7 +51,9 @@ function JournalList() {
         { journal_entry: newEntry }
       );
   
+      // Update both entries and filteredEntries
       setEntries((prevEntries) => [response.data, ...prevEntries]);
+      setFilteredEntries((prevEntries) => [response.data, ...prevEntries]); // Add this line
       setMessage('Journal entry enhanced and saved successfully!');
       setMessageType('success');
       setNewEntry({ title: '', content: '' });

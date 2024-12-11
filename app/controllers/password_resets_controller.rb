@@ -6,7 +6,7 @@ class PasswordResetsController < ApplicationController
   end
 
   def create
-    user = User.find_by(email: params[:email])
+    user = User.find_by("lower(email) = ?", params[:email].downcase)
     if user
       temp_password = SecureRandom.alphanumeric(12)
       if user.update(password: temp_password)
