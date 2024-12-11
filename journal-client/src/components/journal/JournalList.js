@@ -175,8 +175,8 @@ function JournalList() {
 
             input:focus, textarea:focus {
               outline: none;
-              border-color: #ff8b5f !important;
-              box-shadow: 0 0 0 2px rgba(255, 139, 95, 0.2) !important;
+              border-color: #ffc5a8 !important;
+              box-shadow: 0 0 0 2px rgba(255, 197, 168, 0.2) !important;
             }
           `}
         </style>
