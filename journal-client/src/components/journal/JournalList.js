@@ -147,7 +147,7 @@ function JournalList() {
               padding: 2px;
               cursor: pointer;
               border-radius: 3px;
-              filter: brightness(1.8) invert(0.8) sepia(1) saturate(5) hue-rotate(345deg);
+              filter: sepia(30%) saturate(100%) hue-rotate(370deg) brightness(100%);
               position: absolute;
               right: 8px;
               top: 50%;
@@ -158,7 +158,8 @@ function JournalList() {
             }
 
             input[type="date"]::-webkit-calendar-picker-indicator:hover {
-              filter: brightness(2) invert(0.8) sepia(1) saturate(5) hue-rotate(345deg);
+              background-color: transparent;
+              filter: invert(100%);
             }
 
             input, textarea {
