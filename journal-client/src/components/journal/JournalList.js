@@ -160,6 +160,24 @@ function JournalList() {
             input[type="date"]::-webkit-calendar-picker-indicator:hover {
               filter: brightness(2) invert(0.8) sepia(1) saturate(5) hue-rotate(345deg);
             }
+
+            input, textarea {
+              width: 100%;
+              padding: 12px;
+              border: 1px solid #7899b7;
+              border-radius: 4px;
+              font-size: 0.875rem;
+              background-color: #333333;
+              color: #ffffff;
+              box-sizing: border-box;
+              transition: border-color 0.2s ease;
+            }
+
+            input:focus, textarea:focus {
+              outline: none;
+              border-color: #ff8b5f !important;
+              box-shadow: 0 0 0 2px rgba(255, 139, 95, 0.2) !important;
+            }
           `}
         </style>
         <div className="header-container" style={styles.headerWrapper}>

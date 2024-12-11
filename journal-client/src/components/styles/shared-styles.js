@@ -81,8 +81,8 @@ export const sharedStyles = {
     transition: 'border-color 0.2s ease',
     '&:focus': {
       outline: 'none',
-      borderColor: COLORS.primary,
-      boxShadow: `0 0 0 2px ${COLORS.primary}33`,
+      borderColor: COLORS.secondary,
+      boxShadow: `0 0 0 2px ${COLORS.secondary}33`,
     }
   },
   textarea: {
@@ -99,8 +99,8 @@ export const sharedStyles = {
     transition: 'border-color 0.2s ease',
     '&:focus': {
       outline: 'none',
-      borderColor: COLORS.primary,
-      boxShadow: `0 0 0 2px ${COLORS.primary}33`,
+      borderColor: COLORS.secondary,
+      boxShadow: `0 0 0 2px ${COLORS.secondary}33`,
     }
   },
   buttonGroup: {
