@@ -42,14 +42,14 @@ const ForgotPassword = ({ onBackToLogin }) => {
             type="submit" 
             style={combineStyles(styles.button, styles.primaryButton)}
           >
-            Send Temporary Password
+            Reset Password
           </button>
           <button 
             type="button" 
             onClick={onBackToLogin} 
             style={combineStyles(styles.button, styles.secondaryButton)}
           >
-            Back to Login
+            Back
           </button>
         </div>
       </form>
@@ -72,11 +72,7 @@ const styles = {
   container: {
     ...sharedStyles.container,
     maxWidth: '500px',
-  },
-  buttonGroup: {
-    ...sharedStyles.buttonGroup,
-    marginTop: '20px',
-  },
+  }
 };
 
 export default ForgotPassword;

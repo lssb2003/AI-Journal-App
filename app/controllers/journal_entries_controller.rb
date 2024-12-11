@@ -1,6 +1,3 @@
-
-
-
 require "openai"
 require "net/http"
 require "json"

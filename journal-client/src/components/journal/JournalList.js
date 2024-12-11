@@ -1,22 +1,45 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { sharedStyles, combineStyles } from '../styles/shared-styles';
+import { sharedStyles, journalStyles, combineStyles } from '../styles/shared-styles';
 
 function JournalList() {
   const [entries, setEntries] = useState([]);
   const [newEntry, setNewEntry] = useState({ title: '', content: '' });
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
+  const [filteredEntries, setFilteredEntries] = useState([]);
+  const [selectedDate, setSelectedDate] = useState('');
+  const [isFiltered, setIsFiltered] = useState(false);
 
   const fetchEntries = async () => {
     try {
       const response = await axios.get('/journal_entries');
       setEntries(response.data);
+      setFilteredEntries(response.data);
     } catch (error) {
       console.error('Failed to fetch entries:', error);
       setMessage('Failed to load journal entries.');
       setMessageType('error');
     }
+  };
+
+  const handleDateSearch = (date) => {
+    setSelectedDate(date);
+    if (date) {
+      const searchDate = new Date(date).toISOString().split('T')[0];
+      const filtered = entries.filter(entry => {
+        const entryDate = new Date(entry.created_at).toISOString().split('T')[0];
+        return entryDate === searchDate;
+      });
+      setFilteredEntries(filtered);
+      setIsFiltered(true);
+    }
+  };
+
+  const resetSearch = () => {
+    setSelectedDate('');
+    setFilteredEntries(entries);
+    setIsFiltered(false);
   };
 
   const createEntry = async (e) => {
@@ -43,6 +66,7 @@ function JournalList() {
     try {
       await axios.delete(`/journal_entries/${id}`);
       setEntries((prevEntries) => prevEntries.filter((entry) => entry.id !== id));
+      setFilteredEntries((prevEntries) => prevEntries.filter((entry) => entry.id !== id));
       setMessage('Journal entry deleted successfully!');
       setMessageType('success');
     } catch (error) {
@@ -70,7 +94,7 @@ function JournalList() {
       )}
 
       <form onSubmit={createEntry} style={styles.form}>
-        <h3 style={styles.subHeading}>Create New Entry</h3>
+        <h3 style={styles.heading}>Create New Entry</h3>
         <div style={styles.inputGroup}>
           <input
             type="text"
@@ -93,10 +117,77 @@ function JournalList() {
         </div>
       </form>
 
-      <h3 style={styles.subHeading}>Journal Entries</h3>
-      {entries.length > 0 ? (
+      <div style={styles.headerContainer}>
+        <style>
+          {`
+            @media (max-width: 600px) {
+              .header-container {
+                flex-direction: column;
+                gap: 12px;
+                align-items: stretch;
+              }
+              .date-search-group {
+                justify-content: space-between;
+                align-items: center;
+              }
+              .subheading {
+                text-align: center;
+                margin-bottom: 8px;
+              }
+            }
+
+            input[type="date"] {
+              position: relative;
+            }
+
+            input[type="date"]::-webkit-calendar-picker-indicator {
+              background-color: #ff8b5f;
+              padding: 2px;
+              cursor: pointer;
+              border-radius: 3px;
+              filter: brightness(1.8) invert(0.8) sepia(1) saturate(5) hue-rotate(345deg);
+              position: absolute;
+              right: 8px;
+              top: 50%;
+              transform: translateY(-50%);
+              margin: 0;
+              width: 16px;
+              height: 16px;
+            }
+
+            input[type="date"]::-webkit-calendar-picker-indicator:hover {
+              filter: brightness(2) invert(0.8) sepia(1) saturate(5) hue-rotate(345deg);
+            }
+          `}
+        </style>
+        <div className="header-container" style={styles.headerWrapper}>
+          <h3 className="subheading" style={styles.heading}>
+            {isFiltered ? `Entries for ${new Date(selectedDate).toLocaleDateString()}` : 'Journal Entries'}
+          </h3>
+          <div className="date-search-group" style={styles.dateSearchGroup}>
+            <div style={styles.dateInputContainer}>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => handleDateSearch(e.target.value)}
+                style={styles.dateInput}
+              />
+            </div>
+            {isFiltered && (
+              <button
+                onClick={resetSearch}
+                style={combineStyles(styles.button, styles.secondaryButton)}
+              >
+                Show All
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {filteredEntries.length > 0 ? (
         <ul style={styles.entryList}>
-          {entries.map((entry) => (
+          {filteredEntries.map((entry) => (
             <li key={entry.id} style={styles.entryItem}>
               <h4 style={styles.entryTitle}>{entry.title}</h4>
               <p style={styles.entryContent}>{entry.content}</p>
@@ -115,7 +206,9 @@ function JournalList() {
           ))}
         </ul>
       ) : (
-        <p style={styles.noEntries}>No entries yet.</p>
+        <p style={styles.noEntries}>
+          {isFiltered ? 'No entries found for this date.' : 'No entries yet.'}
+        </p>
       )}
     </div>
   );
@@ -123,65 +216,7 @@ function JournalList() {
 
 const styles = {
   ...sharedStyles,
-  container: {
-    ...sharedStyles.container,
-    maxWidth: '800px',
-  },
-  subHeading: {
-    color: '#333',
-    fontSize: '20px',
-    marginBottom: '15px',
-  },
-  entryList: {
-    listStyleType: 'none',
-    padding: 0,
-    margin: 0,
-  },
-  entryItem: {
-    backgroundColor: '#fff',
-    padding: '20px',
-    marginBottom: '15px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
-  },
-  entryTitle: {
-    fontSize: '18px',
-    color: '#333',
-    marginBottom: '10px',
-    fontWeight: 'bold',
-  },
-  entryContent: {
-    color: '#666',
-    fontSize: '14px',
-    lineHeight: '1.6',
-    marginBottom: '15px',
-  },
-  entryFooter: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  entryDate: {
-    color: '#999',
-    fontSize: '12px',
-  },
-  deleteButton: {
-    padding: '5px 10px',
-    fontSize: '12px',
-  },
-  textarea: {
-    ...sharedStyles.textarea,
-    minHeight: '120px',
-  },
-  noEntries: {
-    textAlign: 'center',
-    color: '#666',
-    fontStyle: 'italic',
-    marginTop: '20px',
-  },
+  ...journalStyles,
 };
 
 export default JournalList;
-
-
-

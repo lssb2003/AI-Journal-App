@@ -30,7 +30,7 @@ JotBot is a personal journaling application that enhances your journal entries u
 
 ### Step 1: Database Setup
 ```bash
-# Install PostgreSQL (Ubuntu/Debian)
+# Install PostgreSQL (Ubuntu)
 sudo apt update
 sudo apt install postgresql postgresql-contrib
 

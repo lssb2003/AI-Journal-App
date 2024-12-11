@@ -99,6 +99,10 @@ const styles = {
     fontSize: '14px',
     marginTop: '10px',
   },
+  container: {
+    ...sharedStyles.container,
+    maxWidth: '500px',
+  }  
 };
 
 export default Login;

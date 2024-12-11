@@ -105,11 +105,7 @@ const styles = {
   container: {
     ...sharedStyles.container,
     maxWidth: '500px',
-  },
-  buttonGroup: {
-    ...sharedStyles.buttonGroup,
-    marginTop: '20px',
-  },
+  }
 };
 
 export default ResetPassword;

@@ -118,8 +118,9 @@ const styles = {
   ...sharedStyles,
   appContainer: {
     minHeight: '100vh',
-    backgroundColor: '#f5f6f8',
+    backgroundColor: '#1a1a1a',
     padding: '20px',
+    boxSizing: 'border-box',
   },
   loadingContainer: {
     display: 'flex',
@@ -127,22 +128,24 @@ const styles = {
     alignItems: 'center',
     minHeight: '100vh',
     fontSize: '18px',
-    color: '#666',
+    color: '#ffffff',
   },
   journalContainer: {
     display: 'flex',
     flexDirection: 'column',
     gap: '20px',
-    maxWidth: '800px',
+    maxWidth: '1000px',
     margin: '0 auto',
+    boxSizing: 'border-box',
   },
   authContainer: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     gap: '15px',
-    maxWidth: '500px',
+    maxWidth: '600px',
     margin: '0 auto',
+    boxSizing: 'border-box',
   },
   buttonContainer: {
     display: 'flex',
@@ -153,7 +156,7 @@ const styles = {
   switchAuthButton: {
     fontSize: '14px',
     padding: '10px',
-    color: '#007bff',
+    color: '#7899b7',
     marginTop: '10px',
   },
 };

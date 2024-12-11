@@ -38,13 +38,13 @@ function Register({ onRegister }) {
       <h2 style={styles.heading}>Register</h2>
       <form onSubmit={handleRegister} style={styles.form}>
         <div style={styles.inputGroup}>
-          <label style={styles.label}>Username:</label>
+          <label style={styles.label}>Email address:</label>
           <input
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             style={styles.input}
-            placeholder="Choose a username"
+            placeholder="Enter your email"
             required
           />
         </div>
@@ -85,7 +85,7 @@ const styles = {
   container: {
     ...sharedStyles.container,
     maxWidth: '500px',
-  },
+  }  
 };
 
 export default Register;

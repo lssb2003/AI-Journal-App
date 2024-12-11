@@ -1,4 +1,5 @@
 import React from 'react';
+import { COLORS } from '../styles/shared-styles';
 
 const LoadingSpinner = ({ size = 'medium' }) => {
   const sizes = {
@@ -10,8 +11,8 @@ const LoadingSpinner = ({ size = 'medium' }) => {
   const spinnerStyle = {
     width: sizes[size],
     height: sizes[size],
-    border: '3px solid #f3f3f3',
-    borderTop: '3px solid #3498db',
+    border: `3px solid ${COLORS.spinnerBg}`,
+    borderTop: `3px solid ${COLORS.spinnerPrimary}`,
     borderRadius: '50%',
     animation: 'spin 1s linear infinite',
   };
