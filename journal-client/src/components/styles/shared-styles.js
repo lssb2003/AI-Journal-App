@@ -24,7 +24,7 @@ export const BREAKPOINTS = {
 
 export const sharedStyles = {
   container: {
-    width: '90%',
+    width: '95%', // Changed from 90% to 95%
     maxWidth: '1000px',
     margin: '50px auto',
     padding: '30px',
@@ -34,8 +34,9 @@ export const sharedStyles = {
     color: COLORS.text,
     boxSizing: 'border-box',
     [`@media (max-width: ${BREAKPOINTS.mobile})`]: {
-      padding: '20px',
-      margin: '20px auto',
+      width: '98%', // Added to maximize width on mobile
+      padding: '15px', // Reduced from 20px to 15px
+      margin: '15px auto', // Reduced from 20px to 15px
     }
   },
   form: {
@@ -49,7 +50,7 @@ export const sharedStyles = {
     marginBottom: '20px',
     boxSizing: 'border-box',
     [`@media (max-width: ${BREAKPOINTS.mobile})`]: {
-      padding: '20px',
+      padding: '15px', // Reduced from 20px to 15px
     }
   },
   heading: {
@@ -200,7 +201,7 @@ export const sharedStyles = {
     textAlign: 'center',
     marginBottom: '10px',
     color: COLORS.primary,
-    fontFamily: "'Great Vibes', cursive",
+    fontFamily: "'Pacifico', cursive",
     [`@media (max-width: ${BREAKPOINTS.mobile})`]: {
       fontSize: '2rem',
     }
