@@ -300,7 +300,7 @@ export const journalStyles = {
     }
   },
   entryDate: {
-    color: COLORS.secondary,
+    color: COLORS.accent,
     fontSize: '0.75rem',
   },
   deleteButton: {
@@ -310,7 +310,7 @@ export const journalStyles = {
   },
   noEntries: {
     textAlign: 'center',
-    color: COLORS.primary,
+    color: COLORS.accent,
     fontStyle: 'italic',
     marginTop: '20px',
     padding: '20px',

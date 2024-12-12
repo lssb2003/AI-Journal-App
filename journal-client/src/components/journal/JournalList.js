@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { sharedStyles, journalStyles, combineStyles } from '../styles/shared-styles';
+import EmotionsChart from './EmotionsChart';
+
 
 function JournalList() {
   const [entries, setEntries] = useState([]);
@@ -10,6 +12,7 @@ function JournalList() {
   const [filteredEntries, setFilteredEntries] = useState([]);
   const [selectedDate, setSelectedDate] = useState('');
   const [isFiltered, setIsFiltered] = useState(false);
+  const [showEmotionChart, setShowEmotionChart] = useState(false);
 
   const fetchEntries = async () => {
     try {
@@ -206,6 +209,12 @@ function JournalList() {
                 Show All
               </button>
             )}
+            <button
+              onClick={() => setShowEmotionChart(true)}
+              style={combineStyles(styles.button, styles.primaryButton)}
+            >
+              Insights
+            </button>
           </div>
         </div>
       </div>
@@ -235,6 +244,11 @@ function JournalList() {
           {isFiltered ? 'No entries found for this date.' : 'No entries yet.'}
         </p>
       )}
+
+      {showEmotionChart && (
+        <EmotionsChart onClose={() => setShowEmotionChart(false)} />
+      )}
+
     </div>
   );
 }
