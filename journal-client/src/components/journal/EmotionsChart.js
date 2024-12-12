@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import { COLORS } from '../styles/shared-styles';
@@ -12,30 +12,33 @@ const EmotionsChart = ({ onClose }) => {
         return new Date(now.setDate(now.getDate() - now.getDay()));
     });
 
-    const EMOTION_COLORS = {
-        joy: '#FFD700',
-        contentment: COLORS.primary,
-        sadness: '#4169E1',
-        anxiety: '#9370DB',
-        anger: COLORS.danger,
-        surprise: COLORS.accent,
-        love: '#FF69B4',
-        neutral: '#808080'
-    };
     
-    const COLOR_PALETTE = [
-        '#FF7F50', '#6A5ACD', '#7FFF00', '#FF4500', '#1E90FF',
-        '#32CD32', '#FF6347', '#4682B4', '#00FA9A', '#FF1493',
-        '#FFDAB9', '#98FB98', '#AFEEEE', '#DB7093', '#FFE4B5'
-    ];
-    
-    const getEmotionColor = (emotionName) => {
-        const lowercaseEmotion = emotionName.toLowerCase();
-        return EMOTION_COLORS[lowercaseEmotion] || COLOR_PALETTE[emotionData.findIndex(item => 
-            item.name.toLowerCase() === lowercaseEmotion
-        ) % COLOR_PALETTE.length];
-    };
-    
+    // Use useMemo to memoize the color calculation for emotions
+    const getEmotionColor = useMemo(() => {
+        const EMOTION_COLORS = {
+            joy: '#FFD700',
+            contentment: COLORS.primary,
+            sadness: '#4169E1',
+            anxiety: '#9370DB',
+            anger: COLORS.danger,
+            surprise: COLORS.accent,
+            love: '#FF69B4',
+            neutral: '#808080'
+        };
+        const COLOR_PALETTE = [
+            '#FF7F50', '#6A5ACD', '#7FFF00', '#FF4500', '#1E90FF',
+            '#32CD32', '#FF6347', '#4682B4', '#00FA9A', '#FF1493',
+            '#FFDAB9', '#98FB98', '#AFEEEE', '#DB7093', '#FFE4B5'
+        ];
+
+
+        return (emotionName) => {
+            const lowercaseEmotion = emotionName.toLowerCase();
+            return EMOTION_COLORS[lowercaseEmotion] || COLOR_PALETTE[emotionData.findIndex(item => 
+                item.name.toLowerCase() === lowercaseEmotion
+            ) % COLOR_PALETTE.length];
+        };
+    }, [emotionData]);
 
     const handleDateSelect = (event) => {
         const selectedDate = new Date(event.target.value);
