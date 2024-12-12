@@ -35,6 +35,15 @@ const Login = ({ onLogin }) => {
 
   return (
     <div style={styles.container}>
+      <style>
+        {`
+          input:focus {
+            outline: none;
+            border-color: #ffc5a8 !important;
+            box-shadow: 0 0 0 2px rgba(255, 139, 95, 0.2) !important;
+          }
+        `}
+      </style>
       <h1 style={styles.title}>JotBot</h1>
       <p style={styles.description}>Your AI Journal</p>
       <form onSubmit={handleLogin} style={styles.form}>

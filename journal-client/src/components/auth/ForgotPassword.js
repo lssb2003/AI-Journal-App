@@ -24,6 +24,15 @@ const ForgotPassword = ({ onBackToLogin }) => {
 
   return (
     <div style={styles.container}>
+      <style>
+        {`
+          input:focus {
+            outline: none;
+            border-color: #ffc5a8 !important;
+            box-shadow: 0 0 0 2px rgba(255, 139, 95, 0.2) !important;
+          }
+        `}
+      </style>
       <h2 style={styles.heading}>Forgot Password</h2>
       <form onSubmit={handleForgotPassword} style={styles.form}>
         <div style={styles.inputGroup}>

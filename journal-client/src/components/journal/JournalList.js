@@ -128,26 +128,29 @@ function JournalList() {
                 gap: 12px;
                 align-items: stretch;
               }
+              
               .date-search-group {
                 justify-content: space-between;
                 align-items: center;
               }
+              
               .subheading {
                 text-align: center;
                 margin-bottom: 8px;
               }
             }
 
-            input[type="date"] {
-              position: relative;
+            input[type="date"]::-webkit-calendar-picker-indicator:hover {
+              background-color: transparent;
+              filter: invert(100%);
             }
 
+
             input[type="date"]::-webkit-calendar-picker-indicator {
-              background-color: #ff8b5f;
+              background-color: #f5b27f;
               padding: 2px;
               cursor: pointer;
               border-radius: 3px;
-              filter: sepia(30%) saturate(100%) hue-rotate(370deg) brightness(100%);
               position: absolute;
               right: 8px;
               top: 50%;
@@ -155,6 +158,7 @@ function JournalList() {
               margin: 0;
               width: 16px;
               height: 16px;
+              transition: all 0.2s ease;
             }
 
             input[type="date"]::-webkit-calendar-picker-indicator:hover {
@@ -177,7 +181,7 @@ function JournalList() {
             input:focus, textarea:focus {
               outline: none;
               border-color: #ffc5a8 !important;
-              box-shadow: 0 0 0 2px rgba(255, 197, 168, 0.2) !important;
+              box-shadow: 0 0 0 2px rgba(255, 139, 95, 0.2) !important;
             }
           `}
         </style>
