@@ -2,7 +2,7 @@ require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
   # Production settings
-  config.enable_reloading = false
+  config.enable_reloading = true
   config.eager_load = true
   config.consider_all_requests_local = false
 
