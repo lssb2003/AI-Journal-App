@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { sharedStyles, journalStyles, combineStyles } from '../styles/shared-styles';
 import EmotionsChart from './EmotionsChart';
-
+import LoadingSpinner from '../styles/LoadingSpinner';
 
 function JournalList() {
   const [entries, setEntries] = useState([]);
@@ -13,6 +13,7 @@ function JournalList() {
   const [selectedDate, setSelectedDate] = useState('');
   const [isFiltered, setIsFiltered] = useState(false);
   const [showEmotionChart, setShowEmotionChart] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
   const fetchEntries = async () => {
     try {
@@ -47,6 +48,7 @@ function JournalList() {
 
   const createEntry = async (e) => {
     e.preventDefault();
+    setIsCreating(true);
   
     try {
       const response = await axios.post(
@@ -64,6 +66,8 @@ function JournalList() {
       console.error('Failed to create entry:', error);
       setMessage('Failed to enhance and save journal entry.');
       setMessageType('error');
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -108,6 +112,7 @@ function JournalList() {
             onChange={(e) => setNewEntry((prev) => ({ ...prev, title: e.target.value }))}
             style={styles.input}
             required
+            disabled={isCreating} //add
           />
           <textarea
             placeholder="Content"
@@ -115,9 +120,25 @@ function JournalList() {
             onChange={(e) => setNewEntry((prev) => ({ ...prev, content: e.target.value }))}
             style={styles.textarea}
             required
+            disabled={isCreating} //added
           />
-          <button type="submit" style={combineStyles(styles.button, styles.successButton)}>
-            Save Entry
+          <button 
+            type="submit" 
+            style={combineStyles(
+                  styles.button, 
+                  styles.successButton, 
+                  isCreating && styles.disabledButton
+            )}
+            disabled={isCreating}
+          >
+            {isCreating ? (
+              <div style={styles.spinnerContainer}>
+                <LoadingSpinner size="small" />
+                <span style={styles.spinnerText}>Enhancing...</span>
+              </div>
+            ) : (
+              'Save Entry'
+            )}
           </button>
         </div>
       </form>
@@ -213,7 +234,7 @@ function JournalList() {
               onClick={() => setShowEmotionChart(true)}
               style={combineStyles(styles.button, styles.primaryButton)}
             >
-              Insights
+              Weekly insights
             </button>
           </div>
         </div>
@@ -256,6 +277,19 @@ function JournalList() {
 const styles = {
   ...sharedStyles,
   ...journalStyles,
+  spinnerContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+  },
+  spinnerText: {
+    marginLeft: '8px',
+  },
+  disabledButton: {
+    opacity: 0.7,
+    cursor: 'not-allowed',
+  },
 };
 
 export default JournalList;
