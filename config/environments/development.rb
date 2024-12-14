@@ -15,7 +15,7 @@ Rails.application.configure do
   config.action_mailer.raise_delivery_errors = true
   config.action_mailer.perform_caching = false
   config.action_mailer.delivery_method = :smtp
-    config.action_mailer.smtp_settings = {
+  config.action_mailer.smtp_settings = {
     address: "smtp.gmail.com",
     port: 587,
     domain: "gmail.com",
@@ -24,7 +24,6 @@ Rails.application.configure do
     authentication: "plain",
     enable_starttls_auto: true
   }
-
 
   config.action_mailer.default_url_options = { host: "localhost", port: 3001 }
 
@@ -41,4 +40,23 @@ Rails.application.configure do
         methods: [ :get, :post, :put, :patch, :delete, :options, :head ]
     end
   end
+
+  # ActionCable settings for WebSocket
+  config.action_cable.disable_request_forgery_protection = true
+  
+  # Update CORS settings to include WebSocket
+  config.middleware.insert_before 0, Rack::Cors do
+    allow do
+      origins "http://localhost:3000"
+      resource "*",
+        headers: :any,
+        methods: [:get, :post, :put, :patch, :delete, :options, :head],
+        credentials: true
+    end
+  end
+
+  # Allow ActionCable requests from your React app
+  config.action_cable.allowed_request_origins = [
+    'http://localhost:3000'
+  ]
 end

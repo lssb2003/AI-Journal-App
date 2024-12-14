@@ -17,33 +17,23 @@ class JournalEntriesController < ApplicationController
       original_content = journal_entry_params[:content]
       Rails.logger.info "Starting journal entry creation with content length: #{original_content&.length}"
   
-      # Enhance the content using OpenAI API
+      # Combine enhancement and emotion analysis in a single API call
       begin
-        enhanced_content = enhance_journal_entry(original_content)
-        Rails.logger.info "Successfully enhanced content"
+        analyzed_content = analyze_and_enhance_content(original_content)
+        Rails.logger.info "Successfully processed content and emotions"
       rescue => e
-        Rails.logger.error "Error enhancing content: #{e.message}"
+        Rails.logger.error "Error processing content: #{e.message}"
         Rails.logger.error e.backtrace.join("\n")
-        raise "Content enhancement failed: #{e.message}"
-      end
-  
-      # Analyze emotions
-      begin
-        emotion_analysis = analyze_emotions(enhanced_content)
-        Rails.logger.info "Emotion analysis completed: #{emotion_analysis.inspect}"
-      rescue => e
-        Rails.logger.error "Error analyzing emotions: #{e.message}"
-        Rails.logger.error e.backtrace.join("\n")
-        raise "Emotion analysis failed: #{e.message}"
+        raise "Content processing failed: #{e.message}"
       end
   
       # Create and save journal entry
       journal_entry = @current_user.journal_entries.new(
         title: journal_entry_params[:title],
-        content: enhanced_content,
-        primary_emotion: emotion_analysis["primary_emotion"],
-        emotion_intensity: emotion_analysis["emotion_intensity"],
-        emotion_data: emotion_analysis
+        content: analyzed_content["enhanced_content"],
+        primary_emotion: analyzed_content["emotion_data"]["primary_emotion"],
+        emotion_intensity: analyzed_content["emotion_data"]["emotion_intensity"],
+        emotion_data: analyzed_content["emotion_data"]
       )
   
       Rails.logger.info "Attempting to save journal entry with attributes: #{journal_entry.attributes.except('content').inspect}"
@@ -181,153 +171,101 @@ class JournalEntriesController < ApplicationController
   end
 
   # Enhances the journal entry content using OpenAI's API
-  def enhance_journal_entry(content)
+  def analyze_and_enhance_content(content)
     api_key = Rails.application.credentials.dig(:openai, :api_key)
 
-    # Ensure the API key is available
     if api_key.nil? || api_key.empty?
       raise "OpenAI API key is missing!"
     end
 
-    # Prepare the URI for the OpenAI chat completions endpoint
     uri = URI("https://api.openai.com/v1/chat/completions")
 
-    # Set up the request body and headers
-    body = {
-      model: "gpt-3.5-turbo",  # Use the chat model may need to change to chatgpt 4
-      messages: [
-        { role: "system", content: "You are a helpful journal entry assistant. When enhancing entries, do not account for the date." },
-        { role: "user", content: "Enhance this journal entry:\n\n#{content}" }
-      ],
-      max_tokens: 150,
-      temperature: 0.7
-    }.to_json
-
-    headers = {
-      "Content-Type" => "application/json",
-      "Authorization" => "Bearer #{api_key}"
-    }
-
-    # Send the HTTP POST request
-    response = Net::HTTP.post(uri, body, headers)
-
-    # Parse the response and return the enhanced content
-    begin
-      response_body = JSON.parse(response.body)
-      enhanced_content = response_body["choices"][0]["message"]["content"].strip
-      enhanced_content
-    rescue StandardError => e
-      logger.error "OpenAI API request failed: #{e.message}"
-      "There was an error enhancing the content. Please try again later."
-    end
-  end
-
-  # In journal_entries_controller.rb
-  
-  
-  def analyze_emotions(content)
-    begin
-      api_key = Rails.application.credentials.dig(:openai, :api_key)
-      Rails.logger.info "Starting emotion analysis"
-  
-      if api_key.nil? || api_key.empty?
-        raise "OpenAI API key is missing"
-      end
-  
-      uri = URI("https://api.openai.com/v1/chat/completions")
-  
-      system_prompt = <<~PROMPT
-        You are an emotional analysis expert. Analyze the emotional content and respond with ONLY valid JSON matching this format:
-        {
+    system_prompt = <<~PROMPT
+      You are a journal entry assistant that enhances content and analyzes emotions. 
+      Respond with ONLY valid JSON matching this format:
+      {
+        "enhanced_content": "ENHANCED_TEXT",
+        "emotion_data": {
           "primary_emotion": "EMOTION",
           "emotion_intensity": NUMBER,
           "analysis": "TEXT"
         }
-        
-        Rules:
-        - EMOTION must be one of: joy, contentment, sadness, anxiety, anger, surprise, love, neutral, fear, excitement, gratitude, hope, frustration, disappointment, pride
-        - NUMBER must be an integer from 1 to 10 (1 = very mild, 10 = very intense)
-        - TEXT should be a brief analysis (max 100 characters)
-      PROMPT
-
-      body = {
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "system",
-            content: system_prompt
-          },
-          {
-            role: "user",
-            content: "Analyze this journal entry and respond with ONLY the JSON: #{content}"
-          }
-        ],
-        temperature: 0.3
       }
-  
-      Rails.logger.info "Sending request to OpenAI API with model: #{body[:model]}"
       
-      response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
-        request = Net::HTTP::Post.new(uri)
-        request["Content-Type"] = "application/json"
-        request["Authorization"] = "Bearer #{api_key}"
-        request.body = body.to_json
-        http.request(request)
-      end
-  
-      Rails.logger.info "OpenAI API response status: #{response.code}"
-      Rails.logger.info "OpenAI API response body: #{response.body}"
-  
-      response_data = JSON.parse(response.body)
-  
-      if response.code != "200"
-        Rails.logger.error "API Error: #{response_data['error']&.inspect}"
-        raise "OpenAI API request failed: #{response_data['error']['message']}"
-      end
-  
-      if response_data["choices"].nil? || response_data["choices"].empty?
-        raise "No choices in OpenAI response"
-      end
-  
-      result = JSON.parse(response_data["choices"][0]["message"]["content"])
+      Rules:
+      - ENHANCED_TEXT should be an improved version of the input text
+      - EMOTION must be one of: joy, contentment, sadness, anxiety, anger, surprise, love, neutral, fear, excitement, gratitude, hope, frustration, disappointment, pride
+      - NUMBER must be an integer from 1 to 10 (1 = very mild, 10 = very intense)
+      - TEXT should be a brief analysis (max 100 characters)
       
-      # Convert emotion_intensity to integer if it's a float
-      if result["emotion_intensity"].is_a?(Float)
-        result["emotion_intensity"] = (result["emotion_intensity"] * 10).round
-      end
-      
-      # Ensure emotion_intensity is within bounds
-      result["emotion_intensity"] = [[result["emotion_intensity"].to_i, 1].max, 10].min
-  
-      # Validate the response format
-      
-      valid_emotions = [
-        "joy", "contentment", "sadness", "anxiety", 
-        "anger", "surprise", "love", "neutral",
-        "fear", "excitement", "gratitude", "hope", 
-        "frustration", "disappointment", "pride"
-      ]
+      Enhance the text to be more descriptive and detailed while maintaining the original meaning and sentiment.
+    PROMPT
 
-      
-      unless result.is_a?(Hash) && 
-             valid_emotions.include?(result["primary_emotion"]) && 
-             result["emotion_intensity"].is_a?(Integer) && 
-             result["emotion_intensity"].between?(1, 10)
-        raise "Invalid emotion analysis format"
-      end
-  
-      result
-    rescue => e
-      Rails.logger.error "Emotion analysis error: #{e.message}"
-      Rails.logger.error "Full error: #{e.inspect}"
-      Rails.logger.error "Backtrace: #{e.backtrace.join("\n")}"
-      
-      {
+    body = {
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: system_prompt
+        },
+        {
+          role: "user",
+          content: "Process this journal entry: #{content}"
+        }
+      ],
+      temperature: 0.3
+    }
+
+    Rails.logger.info "Sending request to OpenAI API"
+    
+    response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+      request = Net::HTTP::Post.new(uri)
+      request["Content-Type"] = "application/json"
+      request["Authorization"] = "Bearer #{api_key}"
+      request.body = body.to_json
+      http.request(request)
+    end
+
+    Rails.logger.info "OpenAI API response status: #{response.code}"
+
+    if response.code != "200"
+      response_data = JSON.parse(response.body)
+      Rails.logger.error "API Error: #{response_data['error']&.inspect}"
+      raise "OpenAI API request failed: #{response_data['error']['message']}"
+    end
+
+    result = JSON.parse(response.body)
+    processed_content = JSON.parse(result["choices"][0]["message"]["content"])
+
+    # Validate emotion data
+    valid_emotions = [
+      "joy", "contentment", "sadness", "anxiety", 
+      "anger", "surprise", "love", "neutral",
+      "fear", "excitement", "gratitude", "hope", 
+      "frustration", "disappointment", "pride"
+    ]
+
+    emotion_data = processed_content["emotion_data"]
+    unless valid_emotions.include?(emotion_data["primary_emotion"]) && 
+           emotion_data["emotion_intensity"].is_a?(Integer) && 
+           emotion_data["emotion_intensity"].between?(1, 10)
+      raise "Invalid emotion analysis format"
+    end
+
+    processed_content
+  rescue => e
+    Rails.logger.error "Content processing error: #{e.message}"
+    Rails.logger.error e.backtrace.join("\n")
+    
+    # Return a safe default response
+    {
+      "enhanced_content" => content,
+      "emotion_data" => {
         "primary_emotion" => "neutral",
         "emotion_intensity" => 5,
-        "analysis" => "Error analyzing emotions"
+        "analysis" => "Error analyzing content"
       }
-    end
+    }
   end
 
 

@@ -1,9 +1,12 @@
 class SessionsController < ApplicationController
-  skip_before_action :authenticate_user, only: [ :login, :forgot_password, :auth_check ]
+  skip_before_action :authenticate_user, only: [:login, :forgot_password, :auth_check]
 
   def login
-    user = User.find_by("lower(email) = ?", params[:email].downcase)
-    if user&.authenticate(params[:password])
+    login_params = params[:session] || params
+    email = login_params[:email]&.downcase
+
+    user = User.find_by("lower(email) = ?", email)
+    if user&.authenticate(login_params[:password])
       sign_in(user)
       render json: { message: "Logged in successfully" }
     else
@@ -13,30 +16,30 @@ class SessionsController < ApplicationController
 
   def logout
     sign_out
-    render json: { message: "Logged out successfully" }, status: :ok
+    render json: { message: "Logged out successfully" }
   end
 
   def auth_check
-    response = { authenticated: !!current_user }
-    render json: response, status: :ok
+    if current_user
+      render json: { 
+        authenticated: true, 
+        user: { 
+          email: current_user.email,
+          id: current_user.id 
+        } 
+      }
+    else
+      render json: { authenticated: false }
+    end
   end
 
-
   def forgot_password
-    user = User.find_by("lower(email) = ?", params[:email].downcase)
+    user = User.find_by("lower(email) = ?", params[:email]&.downcase)
     if user
-      reset_token = SecureRandom.urlsafe_base64
-      reset_token_expires_at = 1.hour.from_now
-      user.update(
-        reset_password_token: reset_token,
-        reset_password_sent_at: reset_token_expires_at
-      )
-      render json: {
-        message: "Password reset instructions sent",
-        reset_token: reset_token
-      }, status: :ok
+      user.generate_password_reset_token
+      render json: { message: "Password reset instructions sent" }
     else
-      render json: { error: "No user found with that email" }, status: :not_found
+      render json: { error: "Email not found" }, status: :not_found
     end
   end
 end

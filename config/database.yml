@@ -20,14 +20,14 @@ default: &default
 development:
   <<: *default
   database: journal_app_development
-  username: journal_user
-  password: Taekwondo12345@
+  username: <%= ENV['DATABASE_USERNAME'] %>
+  password: <%= ENV['DATABASE_PASSWORD'] %>
 
 test:
   <<: *default
   database: journal_app_test
-  username: journal_user
-  password: Taekwondo12345@
+  username: <%= ENV['DATABASE_USERNAME'] %>
+  password: <%= ENV['DATABASE_PASSWORD'] %>
 
 production:
   <<: *default
