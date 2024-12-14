@@ -11,12 +11,12 @@ class JournalEntriesController < ApplicationController
       render json: { error: "User not authenticated" }, status: :unauthorized
       return
     end
-  
+
     begin
       # Get the user's rough input
       original_content = journal_entry_params[:content]
       Rails.logger.info "Starting journal entry creation with content length: #{original_content&.length}"
-  
+
       # Combine enhancement and emotion analysis in a single API call
       begin
         analyzed_content = analyze_and_enhance_content(original_content)
@@ -26,7 +26,7 @@ class JournalEntriesController < ApplicationController
         Rails.logger.error e.backtrace.join("\n")
         raise "Content processing failed: #{e.message}"
       end
-  
+
       # Create and save journal entry
       journal_entry = @current_user.journal_entries.new(
         title: journal_entry_params[:title],
@@ -35,9 +35,9 @@ class JournalEntriesController < ApplicationController
         emotion_intensity: analyzed_content["emotion_data"]["emotion_intensity"],
         emotion_data: analyzed_content["emotion_data"]
       )
-  
+
       Rails.logger.info "Attempting to save journal entry with attributes: #{journal_entry.attributes.except('content').inspect}"
-  
+
       if journal_entry.save
         Rails.logger.info "Successfully saved journal entry with ID: #{journal_entry.id}"
         render json: journal_entry, status: :created
@@ -46,7 +46,7 @@ class JournalEntriesController < ApplicationController
         Rails.logger.error error_msg
         render json: { error: error_msg }, status: :unprocessable_entity
       end
-  
+
     rescue StandardError => e
       error_msg = "Journal entry creation failed: #{e.message}"
       Rails.logger.error error_msg
@@ -54,7 +54,7 @@ class JournalEntriesController < ApplicationController
       render json: { error: error_msg }, status: :unprocessable_entity
     end
   end
-  
+
 
   def index
     if @current_user.nil?
@@ -82,22 +82,22 @@ class JournalEntriesController < ApplicationController
   def weekly_emotions
     start_date = params[:start_date].to_date
     end_date = params[:end_date].to_date
-  
+
     # Add this logging
     Rails.logger.info "Date Range: #{start_date} to #{end_date}"
-    
+
     entries = @current_user.journal_entries
       .where(created_at: start_date.beginning_of_day..end_date.end_of_day)
-    
+
     # Add this logging
     Rails.logger.info "Found Entries: #{entries.count}"
     Rails.logger.info "Entry Emotions: #{entries.pluck(:primary_emotion)}"
-    
+
     emotion_counts = entries.group(:primary_emotion).count
-    
+
     # Add this logging
     Rails.logger.info "Emotion Counts: #{emotion_counts}"
-  
+
     render json: {
       emotion_counts: emotion_counts,
       total_entries: entries.count,
@@ -114,12 +114,12 @@ class JournalEntriesController < ApplicationController
   def monthly_emotions
     start_date = Date.today.beginning_of_month
     end_date = Date.today.end_of_month
-    
+
     entries = @current_user.journal_entries
       .where(created_at: start_date.beginning_of_day..end_date.end_of_day)
-    
+
     emotion_counts = entries.group(:primary_emotion).count
-    
+
     render json: {
       emotion_counts: emotion_counts,
       total_entries: entries.count,
@@ -133,12 +133,12 @@ class JournalEntriesController < ApplicationController
   def emotion_trends
     start_date = params[:start_date]&.to_date || 30.days.ago.to_date
     end_date = params[:end_date]&.to_date || Date.today
-    
+
     entries = @current_user.journal_entries
       .where(created_at: start_date.beginning_of_day..end_date.end_of_day)
-    
+
     emotion_counts = entries.group(:primary_emotion).count
-    
+
     render json: {
       emotion_counts: emotion_counts,
       total_entries: entries.count,
@@ -151,11 +151,11 @@ class JournalEntriesController < ApplicationController
 
   def emotion_summary
     entries = @current_user.journal_entries
-      .where('created_at > ?', 30.days.ago)
-    
+      .where("created_at > ?", 30.days.ago)
+
     emotion_counts = entries.group(:primary_emotion).count
     intensity_avg = entries.average(:emotion_intensity).to_f.round(1)
-    
+
     render json: {
       emotion_counts: emotion_counts,
       total_entries: entries.count,
@@ -181,7 +181,7 @@ class JournalEntriesController < ApplicationController
     uri = URI("https://api.openai.com/v1/chat/completions")
 
     system_prompt = <<~PROMPT
-      You are a journal entry assistant that enhances content and analyzes emotions. 
+      You are a journal entry assistant that enhances content and analyzes emotions.#{' '}
       Respond with ONLY valid JSON matching this format:
       {
         "enhanced_content": "ENHANCED_TEXT",
@@ -191,13 +191,13 @@ class JournalEntriesController < ApplicationController
           "analysis": "TEXT"
         }
       }
-      
+
       Rules:
       - ENHANCED_TEXT should be an improved version of the input text
       - EMOTION must be one of: joy, contentment, sadness, anxiety, anger, surprise, love, neutral, fear, excitement, gratitude, hope, frustration, disappointment, pride
       - NUMBER must be an integer from 1 to 10 (1 = very mild, 10 = very intense)
       - TEXT should be a brief analysis (max 100 characters)
-      
+
       Enhance the text to be more descriptive and detailed while maintaining the original meaning and sentiment.
     PROMPT
 
@@ -217,7 +217,7 @@ class JournalEntriesController < ApplicationController
     }
 
     Rails.logger.info "Sending request to OpenAI API"
-    
+
     response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
       request = Net::HTTP::Post.new(uri)
       request["Content-Type"] = "application/json"
@@ -239,15 +239,15 @@ class JournalEntriesController < ApplicationController
 
     # Validate emotion data
     valid_emotions = [
-      "joy", "contentment", "sadness", "anxiety", 
+      "joy", "contentment", "sadness", "anxiety",
       "anger", "surprise", "love", "neutral",
-      "fear", "excitement", "gratitude", "hope", 
+      "fear", "excitement", "gratitude", "hope",
       "frustration", "disappointment", "pride"
     ]
 
     emotion_data = processed_content["emotion_data"]
-    unless valid_emotions.include?(emotion_data["primary_emotion"]) && 
-           emotion_data["emotion_intensity"].is_a?(Integer) && 
+    unless valid_emotions.include?(emotion_data["primary_emotion"]) &&
+           emotion_data["emotion_intensity"].is_a?(Integer) &&
            emotion_data["emotion_intensity"].between?(1, 10)
       raise "Invalid emotion analysis format"
     end
@@ -256,7 +256,7 @@ class JournalEntriesController < ApplicationController
   rescue => e
     Rails.logger.error "Content processing error: #{e.message}"
     Rails.logger.error e.backtrace.join("\n")
-    
+
     # Return a safe default response
     {
       "enhanced_content" => content,
@@ -267,6 +267,4 @@ class JournalEntriesController < ApplicationController
       }
     }
   end
-
-
 end

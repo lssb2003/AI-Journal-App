@@ -1,5 +1,5 @@
 class SessionsController < ApplicationController
-  skip_before_action :authenticate_user, only: [:login, :forgot_password, :auth_check]
+  skip_before_action :authenticate_user, only: [ :login, :forgot_password, :auth_check ]
 
   def login
     login_params = params[:session] || params
@@ -21,12 +21,12 @@ class SessionsController < ApplicationController
 
   def auth_check
     if current_user
-      render json: { 
-        authenticated: true, 
-        user: { 
+      render json: {
+        authenticated: true,
+        user: {
           email: current_user.email,
-          id: current_user.id 
-        } 
+          id: current_user.id
+        }
       }
     else
       render json: { authenticated: false }

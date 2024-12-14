@@ -1,6 +1,6 @@
 class JournalEntry < ApplicationRecord
   belongs_to :user
-  
+
   VALID_EMOTIONS = %w[
     joy contentment sadness anxiety anger surprise love neutral
     fear excitement gratitude hope frustration disappointment pride
