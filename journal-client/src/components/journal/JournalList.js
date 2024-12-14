@@ -154,21 +154,29 @@ function JournalList() {
               }
               
               .date-search-group {
-                justify-content: space-between;
-                align-items: center;
+                flex-direction: column;
+                gap: 8px;
+                width: 100%;
               }
               
+              .date-search-group button {
+                width: 100%;
+                margin: 4px 0;
+              }
+
+              .date-input-container {
+                width: 100%;
+              }
+
+              input[type="date"] {
+                width: 100%;
+              }
+
               .subheading {
                 text-align: center;
                 margin-bottom: 8px;
               }
             }
-
-            input[type="date"]::-webkit-calendar-picker-indicator:hover {
-              background-color: transparent;
-              filter: invert(100%);
-            }
-
 
             input[type="date"]::-webkit-calendar-picker-indicator {
               background-color: #f5b27f;
@@ -214,7 +222,7 @@ function JournalList() {
             {isFiltered ? `Entries for ${new Date(selectedDate).toLocaleDateString()}` : 'Journal Entries'}
           </h3>
           <div className="date-search-group" style={styles.dateSearchGroup}>
-            <div style={styles.dateInputContainer}>
+            <div className="date-input-container" style={styles.dateInputContainer}>
               <input
                 type="date"
                 value={selectedDate}
@@ -290,6 +298,24 @@ const styles = {
     opacity: 0.7,
     cursor: 'not-allowed',
   },
+  headerWrapper: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '16px',
+    marginBottom: '24px',
+  },
+  dateSearchGroup: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+  },
+  dateInputContainer: {
+    position: 'relative',
+    minWidth: '200px',
+  },
 };
+
 
 export default JournalList;
