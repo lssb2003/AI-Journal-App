@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
@@ -7,79 +7,85 @@ import ResetPassword from './components/auth/ResetPassword';
 import LoadingSpinner from './components/styles/LoadingSpinner';
 import { sharedStyles, combineStyles } from './components/styles/shared-styles';
 
-// Configure axios defaults
+// Move configuration to a separate config file in practice
+const API_CONFIG = {
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3001',
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  }
+};
+
+// Configure axios with the API settings
 axios.defaults.withCredentials = true;
-axios.defaults.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
-axios.defaults.headers.common['Accept'] = 'application/json';
-axios.defaults.headers.common['Content-Type'] = 'application/json';
+axios.defaults.baseURL = API_CONFIG.baseURL;
+Object.entries(API_CONFIG.headers).forEach(([key, value]) => {
+  axios.defaults.headers.common[key] = value;
+});
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isRegistering, setIsRegistering] = useState(false);
+  // Group related state together
+  const [authState, setAuthState] = useState({
+    isAuthenticated: false,
+    isRegistering: false,
+    showResetPassword: false
+  });
   const [loading, setLoading] = useState(true);
-  const [showResetPassword, setShowResetPassword] = useState(false);
 
+  // Memoize handlers with useCallback to prevent unnecessary re-renders
+  const handleAuthStateChange = useCallback((updates) => {
+    setAuthState(prev => ({ ...prev, ...updates }));
+  }, []);
+
+  const handleLogout = useCallback(async () => {
+    try {
+      await axios.post('/logout');
+      handleAuthStateChange({ isAuthenticated: false });
+      localStorage.removeItem('isAuthenticated');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Add user feedback for errors
+      alert('Failed to logout. Please try again.');
+    }
+  }, [handleAuthStateChange]);
+
+  // Separate authentication logic
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const response = await axios.get('/auth_check');
-        if (response.data.authenticated) {
-          setIsAuthenticated(true);
-          localStorage.setItem('isAuthenticated', 'true'); // Persist login state
-        } else {
-          setIsAuthenticated(false);
-          localStorage.removeItem('isAuthenticated');
-        }
+        const isAuthenticated = response.data.authenticated;
+        handleAuthStateChange({ isAuthenticated });
+        localStorage.setItem('isAuthenticated', isAuthenticated.toString());
       } catch (error) {
-        setIsAuthenticated(false);
+        handleAuthStateChange({ isAuthenticated: false });
         localStorage.removeItem('isAuthenticated');
       } finally {
         setLoading(false);
       }
     };
 
-    // Check stored authentication state on load
+    // Check stored auth first, then verify with server
     const storedAuth = localStorage.getItem('isAuthenticated') === 'true';
     if (storedAuth) {
-      setIsAuthenticated(true);
+      handleAuthStateChange({ isAuthenticated: true });
       setLoading(false);
     } else {
       checkAuth();
     }
 
-    // Listen for logout across tabs
+    // Handle logout across tabs
     const handleStorageChange = (event) => {
       if (event.key === 'isAuthenticated' && event.newValue === null) {
-        setIsAuthenticated(false);
+        handleAuthStateChange({ isAuthenticated: false });
       }
     };
 
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
+  }, [handleAuthStateChange]);
 
-  const handleLogout = async () => {
-    try {
-      await axios.post('/logout');
-      setIsAuthenticated(false);
-      localStorage.removeItem('isAuthenticated'); // Sync logout state across tabs
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  };
-
-  const handleResetPassword = () => {
-    setShowResetPassword(true);
-  };
-
-  const handlePasswordResetComplete = () => {
-    setShowResetPassword(false);
-  };
-
-  const handleBackToJournal = () => {
-    setShowResetPassword(false);
-  };
-
+  // Early return for loading state
   if (loading) {
     return (
       <div style={styles.loadingContainer}>
@@ -88,65 +94,111 @@ function App() {
     );
   }
 
-  return (
-    <div style={styles.appContainer}>
-      {isAuthenticated ? (
-        showResetPassword ? (
-          <ResetPassword 
-            onPasswordReset={handlePasswordResetComplete}
-            onBackToJournal={handleBackToJournal}
-          />
-        ) : (
-          <div style={styles.journalContainer}>
-            <JournalList />
-            <div style={styles.buttonContainer}>
-              <button 
-                onClick={handleResetPassword} 
-                style={combineStyles(styles.button, styles.successButton)}
-              >
-                Change Password
-              </button>
-              <button 
-                onClick={handleLogout} 
-                style={combineStyles(styles.button, styles.dangerButton)}
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        )
-      ) : isRegistering ? (
-        <div style={styles.authContainer}>
-          <Register onRegister={() => setIsRegistering(false)} />
+  // Render different views based on auth state
+  const renderAuthenticatedContent = () => {
+    if (authState.showResetPassword) {
+      return (
+        <ResetPassword 
+          onPasswordReset={() => handleAuthStateChange({ showResetPassword: false })}
+          onBackToJournal={() => handleAuthStateChange({ showResetPassword: false })}
+        />
+      );
+    }
+
+    return (
+      <div style={styles.mainContent}>
+        <JournalList />
+        <div style={styles.buttonContainer}>
           <button 
-            onClick={() => setIsRegistering(false)}
+            onClick={() => handleAuthStateChange({ showResetPassword: true })}
+            style={combineStyles(styles.button, styles.successButton)}
+          >
+            Change Password
+          </button>
+          <button 
+            onClick={handleLogout}
+            style={combineStyles(styles.button, styles.dangerButton)}
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  const renderAuthContent = () => (
+    <div style={styles.authContainer}>
+      {authState.isRegistering ? (
+        <>
+          <Register onRegister={() => handleAuthStateChange({ isRegistering: false })} />
+          <button 
+            onClick={() => handleAuthStateChange({ isRegistering: false })}
             style={combineStyles(styles.button, styles.linkButton, styles.switchAuthButton)}
           >
             Already have an account? Login
           </button>
-        </div>
+        </>
       ) : (
-        <div style={styles.authContainer}>
-          <Login onLogin={() => setIsAuthenticated(true)} />
+        <>
+          <Login onLogin={() => handleAuthStateChange({ isAuthenticated: true })} />
           <button 
-            onClick={() => setIsRegistering(true)}
+            onClick={() => handleAuthStateChange({ isRegistering: true })}
             style={combineStyles(styles.button, styles.linkButton, styles.switchAuthButton)}
           >
             New here? Register
           </button>
-        </div>
+        </>
       )}
+    </div>
+  );
+
+  return (
+    <div style={styles.appContainer}>
+      {authState.isAuthenticated ? renderAuthenticatedContent() : renderAuthContent()}
     </div>
   );
 }
 
+// Separate styles into their own file in practice
 const styles = {
   ...sharedStyles,
   appContainer: {
     minHeight: '100vh',
     backgroundColor: '#1a1a1a',
     padding: '20px',
-    boxSizing: 'border-box',
+  },
+  mainContent: {
+    maxWidth: '1000px',
+    margin: '0 auto',
+    paddingBottom: '100px',
+    position: 'relative',
+    minHeight: 'calc(100vh - 40px)',
+  },
+  buttonContainer: {
+    position: 'fixed',
+    bottom: '20px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    display: 'flex',
+    gap: '8px',          // Reduced gap
+    padding: '10px 15px', // Reduced padding
+    borderRadius: '6px',  // Smaller border radius
+    backdropFilter: 'blur(8px)',
+    WebkitBackdropFilter: 'blur(8px)',
+    backgroundColor: 'rgba(26, 26, 26, 0.3)',
+    maxWidth: '1000px',
+    width: 'fit-content',
+    zIndex: 10,
+    transition: 'background-color 0.2s ease',
+    ':hover': {
+      backgroundColor: 'rgba(26, 26, 26, 0.4)',
+    }
+  },
+  button: {
+    padding: '6px 12px',  // Smaller padding
+    fontSize: '13px',     // Smaller font size
+    borderRadius: '4px',  // Smaller border radius
+    cursor: 'pointer'
   },
   loadingContainer: {
     display: 'flex',
@@ -155,14 +207,6 @@ const styles = {
     minHeight: '100vh',
     fontSize: '18px',
     color: '#ffffff',
-  },
-  journalContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px',
-    maxWidth: '1000px',
-    margin: '0 auto',
-    boxSizing: 'border-box',
   },
   authContainer: {
     display: 'flex',
@@ -173,17 +217,16 @@ const styles = {
     margin: '0 auto',
     boxSizing: 'border-box',
   },
-  buttonContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '10px',
-    padding: '10px',
-  },
   switchAuthButton: {
     fontSize: '14px',
     padding: '10px',
     color: '#7899b7',
     marginTop: '10px',
+    // Add hover effect
+    transition: 'color 0.2s ease',
+    ':hover': {
+      color: '#9ab9d7',
+    }
   },
 };
 
