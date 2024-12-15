@@ -19,47 +19,50 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [showResetPassword, setShowResetPassword] = useState(false);
 
-  const checkAuth = async () => {
-    try {
-      const response = await axios.get('/auth_check');
-      setIsAuthenticated(response.data.authenticated);
-    } catch (error) {
-      setIsAuthenticated(false);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    checkAuth();
-
-    // Set up periodic auth check
-    const checkAuthInterval = setInterval(checkAuth, 60000);
-
-    // Set up cross-tab communication
-    const handleStorageChange = () => {
-      if (window.localStorage.getItem('isLoggedOut') === 'true') {
+    const checkAuth = async () => {
+      try {
+        const response = await axios.get('/auth_check');
+        if (response.data.authenticated) {
+          setIsAuthenticated(true);
+          localStorage.setItem('isAuthenticated', 'true'); // Persist login state
+        } else {
+          setIsAuthenticated(false);
+          localStorage.removeItem('isAuthenticated');
+        }
+      } catch (error) {
         setIsAuthenticated(false);
-        window.localStorage.removeItem('isLoggedOut');
+        localStorage.removeItem('isAuthenticated');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Check stored authentication state on load
+    const storedAuth = localStorage.getItem('isAuthenticated') === 'true';
+    if (storedAuth) {
+      setIsAuthenticated(true);
+      setLoading(false);
+    } else {
+      checkAuth();
+    }
+
+    // Listen for logout across tabs
+    const handleStorageChange = (event) => {
+      if (event.key === 'isAuthenticated' && event.newValue === null) {
+        setIsAuthenticated(false);
       }
     };
 
     window.addEventListener('storage', handleStorageChange);
-
-    // Cleanup
-    return () => {
-      clearInterval(checkAuthInterval);
-      window.removeEventListener('storage', handleStorageChange);
-    };
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const handleLogout = async () => {
     try {
       await axios.post('/logout');
       setIsAuthenticated(false);
-      // Notify other tabs
-      window.localStorage.setItem('isLoggedOut', 'true');
-      window.dispatchEvent(new Event('storage'));
+      localStorage.removeItem('isAuthenticated'); // Sync logout state across tabs
     } catch (error) {
       console.error('Logout failed:', error);
     }
