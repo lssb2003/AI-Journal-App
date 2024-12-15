@@ -19,24 +19,47 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [showResetPassword, setShowResetPassword] = useState(false);
 
+  const checkAuth = async () => {
+    try {
+      const response = await axios.get('/auth_check');
+      setIsAuthenticated(response.data.authenticated);
+    } catch (error) {
+      setIsAuthenticated(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await axios.get('/auth_check');
-        setIsAuthenticated(response.data.authenticated);
-      } catch (error) {
+    checkAuth();
+
+    // Set up periodic auth check
+    const checkAuthInterval = setInterval(checkAuth, 60000);
+
+    // Set up cross-tab communication
+    const handleStorageChange = () => {
+      if (window.localStorage.getItem('isLoggedOut') === 'true') {
         setIsAuthenticated(false);
-      } finally {
-        setLoading(false);
+        window.localStorage.removeItem('isLoggedOut');
       }
     };
-    checkAuth();
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // Cleanup
+    return () => {
+      clearInterval(checkAuthInterval);
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   const handleLogout = async () => {
     try {
       await axios.post('/logout');
       setIsAuthenticated(false);
+      // Notify other tabs
+      window.localStorage.setItem('isLoggedOut', 'true');
+      window.dispatchEvent(new Event('storage'));
     } catch (error) {
       console.error('Logout failed:', error);
     }

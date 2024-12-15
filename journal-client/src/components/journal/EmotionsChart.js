@@ -9,7 +9,9 @@ const EmotionsChart = ({ onClose }) => {
     const [error, setError] = useState(null);
     const [currentWeekStart, setCurrentWeekStart] = useState(() => {
         const now = new Date();
-        return new Date(now.setDate(now.getDate() - now.getDay()));
+        const day = now.getDay();
+        const diff = day === 0 ? -6 : 1 - day;
+        return new Date(now.setDate(now.getDate() + diff));
     });
 
     
