@@ -12,8 +12,6 @@ axios.defaults.withCredentials = true;
 axios.defaults.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 axios.defaults.headers.common['Accept'] = 'application/json';
 axios.defaults.headers.common['Content-Type'] = 'application/json';
-axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
-axios.defaults.headers.common['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,PATCH,OPTIONS';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
