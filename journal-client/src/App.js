@@ -5,26 +5,15 @@ import Register from './components/auth/Register';
 import JournalList from './components/journal/JournalList';
 import ResetPassword from './components/auth/ResetPassword';
 import LoadingSpinner from './components/styles/LoadingSpinner';
-import { sharedStyles, combineStyles } from './components/styles/shared-styles';
+import SettingsMenu from './components/SettingsMenu';
 
-// Move configuration to a separate config file in practice
-const API_CONFIG = {
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3001',
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json'
-  }
-};
-
-// Configure axios with the API settings
+// Configure axios defaults (keeping your existing configuration)
 axios.defaults.withCredentials = true;
-axios.defaults.baseURL = API_CONFIG.baseURL;
-Object.entries(API_CONFIG.headers).forEach(([key, value]) => {
-  axios.defaults.headers.common[key] = value;
-});
+axios.defaults.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+axios.defaults.headers.common['Accept'] = 'application/json';
+axios.defaults.headers.common['Content-Type'] = 'application/json';
 
 function App() {
-  // Group related state together
   const [authState, setAuthState] = useState({
     isAuthenticated: false,
     isRegistering: false,
@@ -32,7 +21,7 @@ function App() {
   });
   const [loading, setLoading] = useState(true);
 
-  // Memoize handlers with useCallback to prevent unnecessary re-renders
+  // Keep your existing auth logic
   const handleAuthStateChange = useCallback((updates) => {
     setAuthState(prev => ({ ...prev, ...updates }));
   }, []);
@@ -44,13 +33,12 @@ function App() {
       localStorage.removeItem('isAuthenticated');
     } catch (error) {
       console.error('Logout failed:', error);
-      // Add user feedback for errors
       alert('Failed to logout. Please try again.');
     }
   }, [handleAuthStateChange]);
 
-  // Separate authentication logic
   useEffect(() => {
+    // Your existing useEffect logic
     const checkAuth = async () => {
       try {
         const response = await axios.get('/auth_check');
@@ -65,7 +53,6 @@ function App() {
       }
     };
 
-    // Check stored auth first, then verify with server
     const storedAuth = localStorage.getItem('isAuthenticated') === 'true';
     if (storedAuth) {
       handleAuthStateChange({ isAuthenticated: true });
@@ -74,7 +61,6 @@ function App() {
       checkAuth();
     }
 
-    // Handle logout across tabs
     const handleStorageChange = (event) => {
       if (event.key === 'isAuthenticated' && event.newValue === null) {
         handleAuthStateChange({ isAuthenticated: false });
@@ -85,149 +71,104 @@ function App() {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, [handleAuthStateChange]);
 
-  // Early return for loading state
-  if (loading) {
-    return (
-      <div style={styles.loadingContainer}>
-        <LoadingSpinner size="large" />
-      </div>
-    );
-  }
-
-  // Render different views based on auth state
   const renderAuthenticatedContent = () => {
     if (authState.showResetPassword) {
       return (
-        <ResetPassword 
-          onPasswordReset={() => handleAuthStateChange({ showResetPassword: false })}
-          onBackToJournal={() => handleAuthStateChange({ showResetPassword: false })}
-        />
+        <div className="container mx-auto px-4 py-6">
+          <ResetPassword 
+            onPasswordReset={() => handleAuthStateChange({ showResetPassword: false })}
+            onBackToJournal={() => handleAuthStateChange({ showResetPassword: false })}
+          />
+        </div>
       );
     }
 
     return (
-      <div style={styles.mainContent}>
-        <JournalList />
-        <div style={styles.buttonContainer}>
-          <button 
-            onClick={() => handleAuthStateChange({ showResetPassword: true })}
-            style={combineStyles(styles.button, styles.successButton)}
-          >
-            Change Password
-          </button>
-          <button 
-            onClick={handleLogout}
-            style={combineStyles(styles.button, styles.dangerButton)}
-          >
-            Logout
-          </button>
+      <div className="container mx-auto px-4 py-6">
+        <div className="bg-gray-800/30 backdrop-blur-lg rounded-xl border border-white/10 p-8 mb-16 shadow-lg">
+          <JournalList />
+          <SettingsMenu 
+            onLogout={handleLogout}
+            onResetPassword={() => handleAuthStateChange({ showResetPassword: true })}
+          />
         </div>
       </div>
     );
   };
 
   const renderAuthContent = () => (
-    <div style={styles.authContainer}>
-      {authState.isRegistering ? (
-        <>
-          <Register onRegister={() => handleAuthStateChange({ isRegistering: false })} />
-          <button 
-            onClick={() => handleAuthStateChange({ isRegistering: false })}
-            style={combineStyles(styles.button, styles.linkButton, styles.switchAuthButton)}
-          >
-            Already have an account? Login
-          </button>
-        </>
-      ) : (
-        <>
-          <Login onLogin={() => handleAuthStateChange({ isAuthenticated: true })} />
-          <button 
-            onClick={() => handleAuthStateChange({ isRegistering: true })}
-            style={combineStyles(styles.button, styles.linkButton, styles.switchAuthButton)}
-          >
-            New here? Register
-          </button>
-        </>
-      )}
+    <div className="min-h-[calc(100vh-40px)] flex items-center justify-center p-4">
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Animated background gradients */}
+        <div className="absolute top-0 -left-1/4 w-1/2 h-1/2 bg-orange-500 opacity-30 blur-3xl animate-blob"></div>
+        <div className="absolute top-1/4 -right-1/4 w-1/2 h-1/2 bg-blue-500 opacity-30 blur-3xl animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-1/4 left-1/4 w-1/2 h-1/2 bg-blue-500 opacity-30 blur-3xl animate-blob animation-delay-4000"></div>
+      </div>
+
+      <div className="relative w-full max-w-md">
+        <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-blue-500 opacity-20 blur-3xl transform rotate-12"></div>
+        <div className="relative">
+          {authState.isRegistering ? (
+            <>
+              <Register onRegister={() => handleAuthStateChange({ isRegistering: false })} />
+              <button 
+                onClick={() => handleAuthStateChange({ isRegistering: false })}
+                className="w-full mt-4 py-2 text-gray-200 hover:text-gray-300 text-sm transition-colors duration-200"
+              >
+                Already have an account? Login
+              </button>
+            </>
+          ) : (
+            <>
+              <Login onLogin={() => handleAuthStateChange({ isAuthenticated: true })} />
+              <button 
+                onClick={() => handleAuthStateChange({ isRegistering: true })}
+                className="w-full mt-4 py-2 text-gray-200 hover:text-gray-300 text-sm transition-colors duration-200"
+              >
+                New here? Register
+              </button>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900"></div>
+        <div className="relative">
+          <LoadingSpinner size="large" />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div style={styles.appContainer}>
-      {authState.isAuthenticated ? renderAuthenticatedContent() : renderAuthContent()}
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Main background */}
+      <div className="fixed inset-0 bg-gradient-to-b from-blue-900 via-orange-300 to-blue-700"></div>
+      
+      {/* Animated mesh gradient */}
+      <div className="fixed inset-0">
+        {/* Sunset/Sunrise animated layers */}
+        <div className="absolute inset-0 bg-gradient-to-t from-orange-500/20 via-pink-500/10 to-transparent animate-gradient-y"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-600/30 via-transparent to-transparent animate-gradient-y animation-delay-2000"></div>
+        
+        {/* Moving clouds effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-transparent to-white/5 animate-gradient-x"></div>
+        
+        {/* Warm glow */}
+        <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-orange-500/10 to-transparent"></div>
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 min-h-screen">
+        {authState.isAuthenticated ? renderAuthenticatedContent() : renderAuthContent()}
+      </div>
     </div>
   );
 }
-
-// Separate styles into their own file in practice
-const styles = {
-  ...sharedStyles,
-  appContainer: {
-    minHeight: '100vh',
-    backgroundColor: '#1a1a1a',
-    padding: '20px',
-  },
-  mainContent: {
-    maxWidth: '1000px',
-    margin: '0 auto',
-    paddingBottom: '100px',
-    position: 'relative',
-    minHeight: 'calc(100vh - 40px)',
-  },
-  buttonContainer: {
-    position: 'fixed',
-    bottom: '20px',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    display: 'flex',
-    gap: '8px',          // Reduced gap
-    padding: '10px 15px', // Reduced padding
-    borderRadius: '6px',  // Smaller border radius
-    backdropFilter: 'blur(8px)',
-    WebkitBackdropFilter: 'blur(8px)',
-    backgroundColor: 'rgba(26, 26, 26, 0.3)',
-    maxWidth: '1000px',
-    width: 'fit-content',
-    zIndex: 10,
-    transition: 'background-color 0.2s ease',
-    ':hover': {
-      backgroundColor: 'rgba(26, 26, 26, 0.4)',
-    }
-  },
-  button: {
-    padding: '6px 12px',  // Smaller padding
-    fontSize: '13px',     // Smaller font size
-    borderRadius: '4px',  // Smaller border radius
-    cursor: 'pointer'
-  },
-  loadingContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: '100vh',
-    fontSize: '18px',
-    color: '#ffffff',
-  },
-  authContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '15px',
-    maxWidth: '600px',
-    margin: '0 auto',
-    boxSizing: 'border-box',
-  },
-  switchAuthButton: {
-    fontSize: '14px',
-    padding: '10px',
-    color: '#7899b7',
-    marginTop: '10px',
-    // Add hover effect
-    transition: 'color 0.2s ease',
-    ':hover': {
-      color: '#9ab9d7',
-    }
-  },
-};
 
 export default App;

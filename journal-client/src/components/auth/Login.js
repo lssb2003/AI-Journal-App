@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import ForgotPassword from './ForgotPassword';
 import LoadingSpinner from '../styles/LoadingSpinner';
-import { sharedStyles, combineStyles } from '../styles/shared-styles';
 
 const Login = ({ onLogin }) => {
   const [email, setEmail] = useState('');
@@ -15,12 +14,9 @@ const Login = ({ onLogin }) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await axios.post('/login', {
-        email,
-        password,
-      });
+      await axios.post('/login', { email, password });
       setMessage('Login successful!');
-      onLogin();  // No longer passing token
+      onLogin();
     } catch (error) {
       console.error('Login failed:', error);
       setMessage('Invalid email or password.');
@@ -34,84 +30,87 @@ const Login = ({ onLogin }) => {
   }
 
   return (
-    <div style={styles.container}>
-      <style>
-        {`
-          input:focus {
-            outline: none;
-            border-color: #ffc5a8 !important;
-            box-shadow: 0 0 0 2px rgba(255, 139, 95, 0.2) !important;
-          }
-        `}
-      </style>
-      <h1 style={styles.title}>JotBot</h1>
-      <p style={styles.description}>Your AI Journal</p>
-      <form onSubmit={handleLogin} style={styles.form}>
-        <div style={styles.inputGroup}>
-          <label style={styles.label}>Email:</label>
+    <div className="w-full max-w-md mx-auto p-6 bg-gray-800 rounded-lg shadow-xl">
+      <h1 className="text-3xl font-bold text-orange-400 text-center mb-2">JotBot</h1>
+      <p className="text-gray-300 text-center mb-8">Your AI Journal</p>
+      
+      <form onSubmit={handleLogin} className="space-y-6">
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-300">
+            Email:
+          </label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            style={styles.input}
+            className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white 
+                     focus:border-orange-300 focus:ring-2 focus:ring-orange-300 focus:ring-opacity-50
+                     disabled:opacity-50 transition duration-150"
             placeholder="Enter your email"
             required
             disabled={isLoading}
           />
         </div>
-        <div style={styles.inputGroup}>
-          <label style={styles.label}>Password:</label>
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-300">
+            Password:
+          </label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            style={styles.input}
+            className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-white 
+                     focus:border-orange-300 focus:ring-2 focus:ring-orange-300 focus:ring-opacity-50
+                     disabled:opacity-50 transition duration-150"
             placeholder="Enter your password"
             required
             disabled={isLoading}
           />
         </div>
-        <div style={styles.buttonGroup}>
-          <button 
-            type="submit" 
-            style={combineStyles(styles.button, styles.primaryButton)}
-            disabled={isLoading}
-          >
-            {isLoading ? <LoadingSpinner size="small" /> : 'Login'}
-          </button>
-        </div>
+
+        <button 
+          type="submit" 
+          className={`w-full py-2 px-4 rounded-md font-medium text-white
+                     bg-gradient-to-r from-orange-400 to-orange-500
+                     hover:from-orange-500 hover:to-orange-600
+                     focus:outline-none focus:ring-2 focus:ring-orange-300
+                     disabled:opacity-50 transition duration-150
+                     flex items-center justify-center space-x-2`}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <div className="flex items-center space-x-2">
+              <LoadingSpinner size="small" />
+              <span>Logging in...</span>
+            </div>
+          ) : (
+            'Login'
+          )}
+        </button>
+
         <button 
           type="button" 
-          style={styles.forgotPasswordButton}
           onClick={() => setShowForgotPassword(true)}
+          className="w-full text-sm text-gray-400 hover:text-gray-300 
+                     focus:outline-none focus:underline transition duration-150"
           disabled={isLoading}
         >
           Forgot Password?
         </button>
       </form>
+
       {message && (
-        <p style={combineStyles(
-          styles.message,
-          message.includes('successful') ? styles.successMessage : styles.errorMessage
-        )}>
+        <div className={`mt-4 p-3 rounded-md ${
+          message.includes('successful')
+            ? 'bg-green-800 text-green-200'
+            : 'bg-red-800 text-red-200'
+        }`}>
           {message}
-        </p>
+        </div>
       )}
     </div>
   );
-};
-
-const styles = {
-  ...sharedStyles,
-  forgotPasswordButton: {
-    ...sharedStyles.linkButton,
-    fontSize: '14px',
-    marginTop: '10px',
-  },
-  container: {
-    ...sharedStyles.container,
-    maxWidth: '500px',
-  }  
 };
 
 export default Login;

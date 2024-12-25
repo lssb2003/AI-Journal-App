@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
-import { COLORS } from '../styles/shared-styles';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import WeekPicker from './WeekPicker';
 
 const EmotionsChart = ({ onClose }) => {
     const [emotionData, setEmotionData] = useState([]);
@@ -14,38 +15,41 @@ const EmotionsChart = ({ onClose }) => {
         return new Date(now.setDate(now.getDate() + diff));
     });
 
-    
-    // Use useMemo to memoize the color calculation for emotions
-    const getEmotionColor = useMemo(() => {
-        const EMOTION_COLORS = {
-            joy: '#FFD700',
-            contentment: COLORS.primary,
-            sadness: '#4169E1',
-            anxiety: '#9370DB',
-            anger: COLORS.danger,
-            surprise: COLORS.accent,
-            love: '#FF69B4',
-            neutral: '#808080'
-        };
-        const COLOR_PALETTE = [
-            '#FF7F50', '#6A5ACD', '#7FFF00', '#FF4500', '#1E90FF',
-            '#32CD32', '#FF6347', '#4682B4', '#00FA9A', '#FF1493',
-            '#FFDAB9', '#98FB98', '#AFEEEE', '#DB7093', '#FFE4B5'
-        ];
+    // Enhanced color palette with sunset/sunrise theme
+    const EMOTION_COLORS = {
+        joy: '#FFB07B',           // Warm orange
+        contentment: '#7CB9E8',   // Calm blue
+        sadness: '#6F8FAF',       // Steel blue
+        anxiety: '#9683EC',       // Soft purple
+        anger: '#FF6B6B',         // Coral red
+        surprise: '#FFB861',      // Amber
+        love: '#FF85A2',          // Rose pink
+        neutral: '#8E99A4',       // Cool gray
+        fear: '#9B6B9E',          // Muted purple
+        excitement: '#FF7E5F',    // Vibrant coral
+        gratitude: '#90CFA0',     // Sage green
+        hope: '#87CEEB',          // Sky blue
+        frustration: '#E57373',   // Soft red
+        disappointment: '#CFA07B', // Dusty brown
+        pride: '#B695C0'          // Lavender
+    };
 
+    const DEFAULT_COLORS = [
+        '#FFB07B', '#7CB9E8', '#9683EC', '#FF6B6B', 
+        '#FFB861', '#FF85A2', '#90CFA0', '#87CEEB'
+    ];
 
-        return (emotionName) => {
-            const lowercaseEmotion = emotionName.toLowerCase();
-            return EMOTION_COLORS[lowercaseEmotion] || COLOR_PALETTE[emotionData.findIndex(item => 
-                item.name.toLowerCase() === lowercaseEmotion
-            ) % COLOR_PALETTE.length];
-        };
-    }, [emotionData]);
+    const getEmotionColor = (emotion) => {
+        const lowercaseEmotion = emotion.toLowerCase();
+        return EMOTION_COLORS[lowercaseEmotion] || 
+               DEFAULT_COLORS[emotionData.findIndex(item => 
+                   item.name.toLowerCase() === lowercaseEmotion
+               ) % DEFAULT_COLORS.length];
+    };
 
     const handleDateSelect = (event) => {
         const selectedDate = new Date(event.target.value);
-        const weekRange = getWeekRange(selectedDate);
-        setCurrentWeekStart(weekRange.start);
+        setCurrentWeekStart(selectedDate);
     };
 
     const formatDateRange = (startDate) => {
@@ -74,18 +78,6 @@ const EmotionsChart = ({ onClose }) => {
         return date > currentWeekStart;
     };
 
-    const getWeekRange = (date) => {
-        const start = new Date(date);
-        start.setDate(start.getDate() - start.getDay());
-        const end = new Date(start);
-        end.setDate(end.getDate() + 6);
-        return {
-            start,
-            end,
-            displayText: `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`
-        };
-    };
-
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -111,8 +103,8 @@ const EmotionsChart = ({ onClose }) => {
 
                 setEmotionData(transformedData);
             } catch (err) {
+                console.error('Error fetching emotion data:', err);
                 setError('Failed to load emotion data');
-                console.error('Error:', err);
             } finally {
                 setLoading(false);
             }
@@ -121,186 +113,170 @@ const EmotionsChart = ({ onClose }) => {
         fetchData();
     }, [currentWeekStart]);
 
-    const CustomTooltip = ({ active, payload }) => {
-        if (active && payload && payload.length) {
-            const data = payload[0].payload;
-            return (
-                <div className="bg-gray-800 p-3 border border-gray-700 rounded-md">
-                    <p className="text-white m-0 font-medium">{`${data.name}: ${data.percentage}%`}</p>
-                    <p className="text-gray-300 m-0 text-sm">
-                        ({data.value} {data.value === 1 ? 'entry' : 'entries'})
-                    </p>
-                </div>
-            );
-        }
-        return null;
-    };
+    const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name }) => {
+        const RADIAN = Math.PI / 180;
+        const radius = innerRadius + (outerRadius - innerRadius) * 0.7;
+        const x = cx + radius * Math.cos(-midAngle * RADIAN);
+        const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
-    const renderCustomizedLegend = (props) => {
-        return (
-            <div style={{ 
-                display: 'flex', 
-                flexWrap: 'wrap', 
-                justifyContent: 'center',
-                gap: '16px',
-                marginTop: '20px'
-            }}>
-                {emotionData.map((entry, index) => (
-                    <div key={`legend-${index}`} style={{ 
-                        display: 'flex', 
-                        alignItems: 'center',
-                        marginRight: '8px'
-                    }}>
-                        <div style={{ 
-                            width: '12px', 
-                            height: '12px', 
-                            backgroundColor: getEmotionColor(entry.name),
-                            marginRight: '6px'
-                        }}></div>
-                        <span style={{ 
-                            color: '#fff',
-                            fontSize: '14px'
-                        }}>
-                            {entry.name} ({entry.percentage}%)
-                        </span>
-                    </div>
-                ))}
-            </div>
-        );
+        return percent * 100 > 5 ? (
+            <text 
+                x={x} 
+                y={y} 
+                fill="white" 
+                textAnchor="middle" 
+                dominantBaseline="central"
+                className="text-sm font-medium"
+            >
+                {name}
+            </text>
+        ) : null;
     };
 
     return (
-        <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999,
-        }}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="relative w-full max-w-4xl bg-gradient-to-br from-gray-900/90 to-gray-800/90 rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
+                {/* Decorative elements */}
+                <div className="absolute top-0 -right-10 w-40 h-40 bg-orange-500/20 rounded-full blur-3xl" />
+                <div className="absolute bottom-0 -left-10 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl" />
 
-            <div style={{
-                backgroundColor: '#1a1a1a',
-                padding: '24px',
-                borderRadius: '12px',
-                width: '95%',
-                maxWidth: '700px',
-                maxHeight: '90vh',
-                overflow: 'auto',
-                position: 'relative',
-                border: '1px solid #333',
-            }}>
-                <button
-                    onClick={onClose}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-white bg-gray-800 hover:bg-gray-700 rounded-full w-8 h-8 flex items-center justify-center transition-colors"
-                >
-                    ×
-                </button>
+                {/* Content container */}
+                <div className="relative p-6 sm:p-8">
+                    {/* Close button */}
+                    <button
+                        onClick={onClose}
+                        className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white 
+                                 bg-white/5 hover:bg-white/10 rounded-lg transition-colors duration-200"
+                    >
+                        <X size={20} />
+                    </button>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                    {/* left and right arrows and text */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                        <button
-                            onClick={() => changeWeek('prev')}
-                            style={{
-                                width: '32px',
-                                height: '32px',
-                                borderRadius: '50%',
-                                backgroundColor: 'transparent',
-                                border: 'none',
-                                color: '#ccc',
-                                cursor: 'pointer',
-                            }}
-                        >
-                            &lt;
-                        </button>
-
-                        <span style={{ fontSize: '14px', color: '#ccc' }}>
-                            {formatDateRange(currentWeekStart)}
-                            {isCurrentWeek(currentWeekStart) && (
-                                <span style={{ marginLeft: '8px', color: '#ffa500' }}>(Current Week)</span>
-                            )}
-                        </span>
-
-                        <button
-                            onClick={() => changeWeek('next')}
-                            disabled={isFutureWeek(new Date(currentWeekStart))}
-                            style={{
-                                width: '32px',
-                                height: '32px',
-                                borderRadius: '50%',
-                                backgroundColor: 'transparent',
-                                border: 'none',
-                                color: '#ccc',
-                                cursor: 'pointer',
-                                opacity: isFutureWeek(new Date(currentWeekStart)) ? 0.5 : 1,
-                            }}
-                        >
-                            &gt;
-                        </button>
+                    {/* Header section */}
+                    <div className="mb-8">
+                        <h2 className="text-2xl font-bold text-transparent bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text">
+                            Weekly Emotional Journey
+                        </h2>
+                        <p className="text-gray-400 mt-1">Track your emotional patterns over time</p>
                     </div>
 
-                    {/* Date Input Section */}
-                    <div style={{ position: 'relative', display: 'inline-block' }}>
-                        <input
-                            type="date"
-                            onChange={handleDateSelect}
-                            max={new Date().toISOString().split('T')[0]}
-                            style={{
-                                width: '150px',
-                                padding: '8px 12px',
-                                borderRadius: '4px',
-                                border: '1px solid #555',
-                                backgroundColor: '#333',
-                                color: '#fff',
-                                fontSize: '14px',
-                            }}
+                    {/* Navigation controls */}
+                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => changeWeek('prev')}
+                                className="p-2 text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 
+                                         rounded-lg transition-colors duration-200"
+                            >
+                                <ChevronLeft size={20} />
+                            </button>
+
+                            <span className="text-white font-medium">
+                                {formatDateRange(currentWeekStart)}
+                                {isCurrentWeek(currentWeekStart) && (
+                                    <span className="ml-2 text-orange-400 text-sm">
+                                        (Current Week)
+                                    </span>
+                                )}
+                            </span>
+
+                            <button
+                                onClick={() => changeWeek('next')}
+                                disabled={isFutureWeek(currentWeekStart)}
+                                className="p-2 text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 
+                                         rounded-lg transition-colors duration-200 disabled:opacity-50 
+                                         disabled:cursor-not-allowed"
+                            >
+                                <ChevronRight size={20} />
+                            </button>
+                        </div>
+
+                        <WeekPicker
+                            currentWeekStart={currentWeekStart}
+                            onWeekSelect={(date) => setCurrentWeekStart(date)}
+                            maxDate={new Date()}
                         />
-                        
+                    </div>
+
+                    {/* Chart content */}
+                    <div className="relative">
+                        {loading ? (
+                            <div className="h-[400px] flex items-center justify-center">
+                                <div className="w-8 h-8 border-4 border-orange-500/30 border-t-orange-500 
+                                              rounded-full animate-spin" />
+                            </div>
+                        ) : error ? (
+                            <div className="h-[400px] flex items-center justify-center text-red-400">
+                                {error}
+                            </div>
+                        ) : emotionData.length === 0 ? (
+                            <div className="h-[400px] flex items-center justify-center text-gray-400">
+                                No journal entries for this week
+                            </div>
+                        ) : (
+                            <div className="h-[400px]">
+                                <ResponsiveContainer>
+                                    <PieChart>
+                                        <Pie
+                                            data={emotionData}
+                                            cx="50%"
+                                            cy="50%"
+                                            labelLine={false}
+                                            label={renderCustomizedLabel}
+                                            outerRadius={150}
+                                            innerRadius={80}
+                                            fill="#8884d8"
+                                            dataKey="value"
+                                        >
+                                            {emotionData.map((entry, index) => (
+                                                <Cell 
+                                                    key={`cell-${index}`}
+                                                    fill={getEmotionColor(entry.name)}
+                                                    className="transition-all duration-300"
+                                                />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip 
+                                            content={({ active, payload }) => {
+                                                if (active && payload && payload.length) {
+                                                    return (
+                                                        <div className="bg-gray-800/90 backdrop-blur-sm border 
+                                                                    border-white/10 rounded-lg p-3 shadow-xl">
+                                                            <p className="text-white font-medium">
+                                                                {payload[0].name}
+                                                            </p>
+                                                            <p className="text-gray-300">
+                                                                {payload[0].payload.percentage}%
+                                                            </p>
+                                                        </div>
+                                                    );
+                                                }
+                                                return null;
+                                            }}
+                                        />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+                        )}
+
+                        {/* Legend */}
+                        {!loading && !error && emotionData.length > 0 && (
+                            <div className="mt-8 flex flex-wrap justify-center gap-4">
+                                {emotionData.map((entry, index) => (
+                                    <div key={`legend-${index}`} 
+                                         className="flex items-center gap-2 bg-white/5 px-3 py-2 rounded-lg">
+                                        <div 
+                                            className="w-3 h-3 rounded"
+                                            style={{ backgroundColor: getEmotionColor(entry.name) }}
+                                        />
+                                        <span className="text-sm text-gray-200">
+                                            {entry.name} ({entry.percentage}%)
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
-
-
-                {loading ? (
-                    <div className="flex justify-center items-center h-[300px]">
-                        <p className="text-gray-400">Loading...</p>
-                    </div>
-                ) : error ? (
-                    <div className="flex justify-center items-center h-[300px]">
-                        <p className="text-red-400">{error}</p>
-                    </div>
-                ) : emotionData.length === 0 ? (
-                    <div className="flex justify-center items-center h-[300px]">
-                        <p className="text-gray-400">No journal entries for this week</p>
-                    </div>
-                ) : (
-                    <div className="w-full flex flex-col items-center">
-                        <PieChart width={400} height={300}>
-                            <Pie
-                                data={emotionData}
-                                cx="50%"
-                                cy="50%"
-                                labelLine={false}
-                                outerRadius={100}
-                                fill="#8884d8"
-                                dataKey="value"
-                            >
-                                {emotionData.map((entry, index) => (
-                                    <Cell
-                                        key={`cell-${index}`}
-                                        fill={getEmotionColor(entry.name)}
-                                    />
-                                ))}
-                            </Pie>
-                            <Tooltip content={<CustomTooltip />} />
-                            <Legend content={renderCustomizedLegend} verticalAlign="bottom" align="center" />
-                        </PieChart>
-                    </div>
-                )}
             </div>
         </div>
     );

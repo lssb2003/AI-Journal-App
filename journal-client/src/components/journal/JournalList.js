@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { sharedStyles, journalStyles, combineStyles } from '../styles/shared-styles';
 import EmotionsChart from './EmotionsChart';
 import LoadingSpinner from '../styles/LoadingSpinner';
+import InsightsMenu from './InsightsMenu';
+import MonthlyEmotions from './MonthlyEmotions';
+
+
+
 
 function JournalList() {
+  // Preserve all original state management
   const [entries, setEntries] = useState([]);
   const [newEntry, setNewEntry] = useState({ title: '', content: '' });
   const [message, setMessage] = useState('');
@@ -14,7 +19,11 @@ function JournalList() {
   const [isFiltered, setIsFiltered] = useState(false);
   const [showEmotionChart, setShowEmotionChart] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [showMonthlyEmotions, setShowMonthlyEmotions] = useState(false);
 
+
+
+  // Keep original data fetching logic
   const fetchEntries = async () => {
     try {
       const response = await axios.get('/journal_entries');
@@ -27,6 +36,7 @@ function JournalList() {
     }
   };
 
+  // Preserve date filtering logic
   const handleDateSearch = (date) => {
     setSelectedDate(date);
     if (date) {
@@ -46,19 +56,15 @@ function JournalList() {
     setIsFiltered(false);
   };
 
+  // Keep original entry creation logic
   const createEntry = async (e) => {
     e.preventDefault();
     setIsCreating(true);
   
     try {
-      const response = await axios.post(
-        '/journal_entries',
-        { journal_entry: newEntry }
-      );
-  
-      // Update both entries and filteredEntries
-      setEntries((prevEntries) => [response.data, ...prevEntries]);
-      setFilteredEntries((prevEntries) => [response.data, ...prevEntries]); // Add this line
+      const response = await axios.post('/journal_entries', { journal_entry: newEntry });
+      setEntries(prevEntries => [response.data, ...prevEntries]);
+      setFilteredEntries(prevEntries => [response.data, ...prevEntries]);
       setMessage('Journal entry enhanced and saved successfully!');
       setMessageType('success');
       setNewEntry({ title: '', content: '' });
@@ -71,11 +77,12 @@ function JournalList() {
     }
   };
 
+  // Preserve delete functionality
   const deleteEntry = async (id) => {
     try {
       await axios.delete(`/journal_entries/${id}`);
-      setEntries((prevEntries) => prevEntries.filter((entry) => entry.id !== id));
-      setFilteredEntries((prevEntries) => prevEntries.filter((entry) => entry.id !== id));
+      setEntries(prevEntries => prevEntries.filter(entry => entry.id !== id));
+      setFilteredEntries(prevEntries => prevEntries.filter(entry => entry.id !== id));
       setMessage('Journal entry deleted successfully!');
       setMessageType('success');
     } catch (error) {
@@ -90,51 +97,56 @@ function JournalList() {
   }, []);
 
   return (
-    <div style={styles.container}>
-      <h2 style={styles.title}>Your Journal</h2>
+    <div className="w-full max-w-4xl mx-auto">
+      <h2 className="text-3xl font-bold text-center text-orange-400 mb-8">Your Journal</h2>
 
       {message && (
-        <p style={combineStyles(
-          styles.message,
-          messageType === 'success' ? styles.successMessage : styles.errorMessage
-        )}>
+        <div className={`mb-6 p-4 rounded-lg ${
+          messageType === 'success' 
+            ? 'bg-green-800/50 text-green-200 border border-green-600'
+            : 'bg-red-800/50 text-red-200 border border-red-600'
+        }`}>
           {message}
-        </p>
+        </div>
       )}
 
-      <form onSubmit={createEntry} style={styles.form}>
-        <h3 style={styles.heading}>Create New Entry</h3>
-        <div style={styles.inputGroup}>
+      {/* Create Entry Form */}
+      <form onSubmit={createEntry} className="mb-8 bg-gray-800/50 rounded-lg p-6 border border-gray-700/50">
+        <h3 className="text-xl font-semibold text-gray-200 mb-4">Create New Entry</h3>
+        <div className="space-y-4">
           <input
             type="text"
             placeholder="Title"
             value={newEntry.title}
-            onChange={(e) => setNewEntry((prev) => ({ ...prev, title: e.target.value }))}
-            style={styles.input}
+            onChange={(e) => setNewEntry(prev => ({ ...prev, title: e.target.value }))}
+            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white
+                     placeholder-gray-400 focus:ring-2 focus:ring-orange-300/50 focus:border-orange-400
+                     disabled:opacity-50 transition duration-200"
             required
-            disabled={isCreating} //add
+            disabled={isCreating}
           />
           <textarea
             placeholder="Content"
             value={newEntry.content}
-            onChange={(e) => setNewEntry((prev) => ({ ...prev, content: e.target.value }))}
-            style={styles.textarea}
+            onChange={(e) => setNewEntry(prev => ({ ...prev, content: e.target.value }))}
+            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white
+                     placeholder-gray-400 focus:ring-2 focus:ring-orange-300/50 focus:border-orange-400
+                     disabled:opacity-50 transition duration-200 min-h-[120px] resize-y"
             required
-            disabled={isCreating} //added
+            disabled={isCreating}
           />
           <button 
             type="submit" 
-            style={combineStyles(
-                  styles.button, 
-                  styles.successButton, 
-                  isCreating && styles.disabledButton
-            )}
             disabled={isCreating}
+            className="w-full py-3 bg-gradient-to-r from-orange-400 to-orange-500
+                     hover:from-orange-500 hover:to-orange-600 text-white rounded-lg
+                     focus:ring-2 focus:ring-orange-300 disabled:opacity-50
+                     transition duration-200 flex items-center justify-center"
           >
             {isCreating ? (
-              <div style={styles.spinnerContainer}>
+              <div className="flex items-center space-x-2">
                 <LoadingSpinner size="small" />
-                <span style={styles.spinnerText}>Enhancing...</span>
+                <span>Enhancing...</span>
               </div>
             ) : (
               'Save Entry'
@@ -143,124 +155,57 @@ function JournalList() {
         </div>
       </form>
 
-      <div style={styles.headerContainer}>
-        <style>
-          {`
-            @media (max-width: 600px) {
-              .header-container {
-                flex-direction: column;
-                gap: 12px;
-                align-items: stretch;
-              }
-              
-              .date-search-group {
-                flex-direction: column;
-                gap: 8px;
-                width: 100%;
-              }
-              
-              .date-search-group button {
-                width: 100%;
-                margin: 4px 0;
-              }
-
-              .date-input-container {
-                width: 100%;
-              }
-
-              input[type="date"] {
-                width: 100%;
-              }
-
-              .subheading {
-                text-align: center;
-                margin-bottom: 8px;
-              }
-            }
-
-            input[type="date"]::-webkit-calendar-picker-indicator {
-              background-color: #f5b27f;
-              padding: 2px;
-              cursor: pointer;
-              border-radius: 3px;
-              position: absolute;
-              right: 8px;
-              top: 50%;
-              transform: translateY(-50%);
-              margin: 0;
-              width: 16px;
-              height: 16px;
-              transition: all 0.2s ease;
-            }
-
-            input[type="date"]::-webkit-calendar-picker-indicator:hover {
-              background-color: transparent;
-              filter: invert(100%);
-            }
-
-            input, textarea {
-              width: 100%;
-              padding: 12px;
-              border: 1px solid #7899b7;
-              border-radius: 4px;
-              font-size: 0.875rem;
-              background-color: #333333;
-              color: #ffffff;
-              box-sizing: border-box;
-              transition: border-color 0.2s ease;
-            }
-
-            input:focus, textarea:focus {
-              outline: none;
-              border-color: #ffc5a8 !important;
-              box-shadow: 0 0 0 2px rgba(255, 139, 95, 0.2) !important;
-            }
-          `}
-        </style>
-        <div className="header-container" style={styles.headerWrapper}>
-          <h3 className="subheading" style={styles.heading}>
-            {isFiltered ? `Entries for ${new Date(selectedDate).toLocaleDateString()}` : 'Journal Entries'}
-          </h3>
-          <div className="date-search-group" style={styles.dateSearchGroup}>
-            <div className="date-input-container" style={styles.dateInputContainer}>
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => handleDateSearch(e.target.value)}
-                style={styles.dateInput}
-              />
-            </div>
-            {isFiltered && (
-              <button
-                onClick={resetSearch}
-                style={combineStyles(styles.button, styles.secondaryButton)}
-              >
-                Show All
-              </button>
-            )}
+      {/* Header and Controls */}
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+        <h3 className="text-xl font-semibold text-gray-200">
+          {isFiltered 
+            ? `Entries for ${new Date(selectedDate).toLocaleDateString()}` 
+            : 'Journal Entries'}
+        </h3>
+        
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => handleDateSearch(e.target.value)}
+            className="w-full sm:w-auto px-4 py-2 bg-gray-700 border border-gray-600 
+                     rounded-lg text-white focus:ring-2 focus:ring-orange-300/50 
+                     focus:border-orange-400 transition duration-200"
+          />
+          
+          {isFiltered && (
             <button
-              onClick={() => setShowEmotionChart(true)}
-              style={combineStyles(styles.button, styles.primaryButton)}
+              onClick={resetSearch}
+              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg
+                       transition duration-200 border border-gray-600"
             >
-              Weekly insights
+              Show All
             </button>
-          </div>
+          )}
+          
+          <InsightsMenu 
+            onSelectWeekly={() => setShowEmotionChart(true)}
+            onSelectMonthly={() => setShowMonthlyEmotions(true)}
+          />
         </div>
       </div>
 
+      {/* Journal Entries List */}
       {filteredEntries.length > 0 ? (
-        <ul style={styles.entryList}>
+        <ul className="space-y-4">
           {filteredEntries.map((entry) => (
-            <li key={entry.id} style={styles.entryItem}>
-              <h4 style={styles.entryTitle}>{entry.title}</h4>
-              <p style={styles.entryContent}>{entry.content}</p>
-              <div style={styles.entryFooter}>
-                <small style={styles.entryDate}>
+            <li key={entry.id} 
+                className="bg-gray-800/50 rounded-lg p-6 border border-gray-700/50">
+              <h4 className="text-xl font-semibold text-orange-400 mb-3">{entry.title}</h4>
+              <p className="text-gray-300 mb-4 whitespace-pre-wrap">{entry.content}</p>
+              <div className="flex justify-between items-center">
+                <small className="text-gray-400">
                   {new Date(entry.created_at).toLocaleString()}
                 </small>
                 <button 
                   onClick={() => deleteEntry(entry.id)}
-                  style={combineStyles(styles.button, styles.dangerButton, styles.deleteButton)}
+                  className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm 
+                           rounded-lg transition duration-200"
                 >
                   Delete
                 </button>
@@ -269,53 +214,20 @@ function JournalList() {
           ))}
         </ul>
       ) : (
-        <p style={styles.noEntries}>
+        <p className="text-gray-400 text-center py-8">
           {isFiltered ? 'No entries found for this date.' : 'No entries yet.'}
         </p>
       )}
 
+      {/* Preserve EmotionsChart functionality */}
       {showEmotionChart && (
         <EmotionsChart onClose={() => setShowEmotionChart(false)} />
       )}
-
+      {showMonthlyEmotions && (
+        <MonthlyEmotions onClose={() => setShowMonthlyEmotions(false)} />
+      )}
     </div>
   );
 }
-
-const styles = {
-  ...sharedStyles,
-  ...journalStyles,
-  spinnerContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '8px',
-  },
-  spinnerText: {
-    marginLeft: '8px',
-  },
-  disabledButton: {
-    opacity: 0.7,
-    cursor: 'not-allowed',
-  },
-  headerWrapper: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: '16px',
-    marginBottom: '24px',
-  },
-  dateSearchGroup: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-  },
-  dateInputContainer: {
-    position: 'relative',
-    minWidth: '200px',
-  },
-};
-
 
 export default JournalList;

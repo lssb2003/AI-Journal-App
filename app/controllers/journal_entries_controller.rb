@@ -112,23 +112,44 @@ class JournalEntriesController < ApplicationController
   # add this for deeper analysis
 
   def monthly_emotions
-    start_date = Date.today.beginning_of_month
-    end_date = Date.today.end_of_month
+    # Parse requested date or default to current month
+    requested_date = if params[:date].present?
+      begin
+        Date.parse(params[:date])
+      rescue ArgumentError
+        Rails.logger.error "Invalid date format received: #{params[:date]}"
+        Date.today
+      end
+    else
+      Date.today
+    end
+
+    Rails.logger.info "Processing request for date: #{requested_date}"
+
+    start_date = requested_date.beginning_of_month
+    end_date = requested_date.end_of_month
 
     entries = @current_user.journal_entries
       .where(created_at: start_date.beginning_of_day..end_date.end_of_day)
 
     emotion_counts = entries.group(:primary_emotion).count
+    total_entries = entries.count
+
+    Rails.logger.info "Found #{total_entries} entries for #{start_date} to #{end_date}"
+    Rails.logger.info "Emotion counts: #{emotion_counts.inspect}"
 
     render json: {
       emotion_counts: emotion_counts,
-      total_entries: entries.count,
+      total_entries: total_entries,
       date_range: {
-        start_date: start_date,
-        end_date: end_date
+        start_date: start_date.strftime("%Y-%m-%d"),
+        end_date: end_date.strftime("%Y-%m-%d")
       }
     }
   end
+
+
+
 
   def emotion_trends
     start_date = params[:start_date]&.to_date || 30.days.ago.to_date
