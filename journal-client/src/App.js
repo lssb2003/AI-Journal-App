@@ -154,7 +154,7 @@ function App() {
       <div className="fixed inset-0">
         {/* Sunset/Sunrise animated layers */}
         <div className="absolute inset-0 bg-gradient-to-t from-orange-500/20 via-pink-500/10 to-transparent animate-gradient-y"></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-blue-600/30 via-transparent to-transparent animate-gradient-y animation-delay-2000"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-700/30 via-transparent to-transparent animate-gradient-y animation-delay-2000"></div>
         
         {/* Moving clouds effect */}
         <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-transparent to-white/5 animate-gradient-x"></div>

@@ -33,7 +33,7 @@ function Register({ onRegister }) {
   };
 
   return (
-    <div className="w-full max-w-lg mx-auto">
+    <div className="w-full max-w-lg mx-auto p-6 bg-gray-800/30 backdrop-blur-lg rounded-xl border border-white/10">
       <h2 className="text-2xl font-bold text-center text-orange-400 mb-6">Register</h2>
       
       <form onSubmit={handleRegister} className="space-y-6">

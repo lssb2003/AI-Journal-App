@@ -4,7 +4,7 @@ class UsersController < ApplicationController
   def create
     email = user_params[:email] || user_params[:username]
 
-    if User.exists?("lower(email) = ?", email.downcase)
+    if User.exists?([ "lower(email) = ?", email.downcase ])
       render json: { errors: [ "Email is already registered" ] }, status: :unprocessable_entity
       return
     end
