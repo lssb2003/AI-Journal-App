@@ -4,6 +4,7 @@ import EmotionsChart from './EmotionsChart';
 import LoadingSpinner from '../styles/LoadingSpinner';
 import InsightsMenu from './InsightsMenu';
 import MonthlyEmotions from './MonthlyEmotions';
+import ConfirmDialog from './ConfirmDialog';
 
 
 
@@ -20,7 +21,8 @@ function JournalList() {
   const [showEmotionChart, setShowEmotionChart] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [showMonthlyEmotions, setShowMonthlyEmotions] = useState(false);
-
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [entryToDelete, setEntryToDelete] = useState(null);
 
 
   // Keep original data fetching logic
@@ -78,19 +80,29 @@ function JournalList() {
   };
 
   // Preserve delete functionality
-  const deleteEntry = async (id) => {
+  const deleteEntry = (id) => {
+    setEntryToDelete(id);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
     try {
-      await axios.delete(`/journal_entries/${id}`);
-      setEntries(prevEntries => prevEntries.filter(entry => entry.id !== id));
-      setFilteredEntries(prevEntries => prevEntries.filter(entry => entry.id !== id));
+      await axios.delete(`/journal_entries/${entryToDelete}`);
+      setEntries(prevEntries => prevEntries.filter(entry => entry.id !== entryToDelete));
+      setFilteredEntries(prevEntries => prevEntries.filter(entry => entry.id !== entryToDelete));
       setMessage('Journal entry deleted successfully!');
       setMessageType('success');
     } catch (error) {
       console.error('Failed to delete entry:', error);
       setMessage('Failed to delete journal entry.');
       setMessageType('error');
+    } finally {
+      setShowDeleteConfirm(false);
+      setEntryToDelete(null);
     }
   };
+
+
 
   useEffect(() => {
     fetchEntries();
@@ -226,6 +238,17 @@ function JournalList() {
       {showMonthlyEmotions && (
         <MonthlyEmotions onClose={() => setShowMonthlyEmotions(false)} />
       )}
+
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => {
+          setShowDeleteConfirm(false);
+          setEntryToDelete(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        title="Delete Journal Entry"
+        message="Are you sure you want to delete this journal entry? This action cannot be undone."
+      />
     </div>
   );
 }

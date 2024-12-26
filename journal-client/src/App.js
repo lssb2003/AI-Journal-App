@@ -137,7 +137,7 @@ function App() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-blue-400 to-gray-900"></div>
         <div className="relative">
           <LoadingSpinner size="large" />
         </div>
