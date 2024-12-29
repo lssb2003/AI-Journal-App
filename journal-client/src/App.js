@@ -148,12 +148,12 @@ function App() {
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Main background */}
-      <div className="fixed inset-0 bg-gradient-to-b from-blue-900 via-orange-300 to-blue-700"></div>
+      <div className="fixed inset-0 bg-gradient-to-b from-blue-300 via-orange-200 to-blue-900"></div>
       
       {/* Animated mesh gradient */}
       <div className="fixed inset-0">
         {/* Sunset/Sunrise animated layers */}
-        <div className="absolute inset-0 bg-gradient-to-t from-orange-500/20 via-pink-500/10 to-transparent animate-gradient-y"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-orange-500/20 via-blue-800/10 to-transparent animate-gradient-y"></div>
         <div className="absolute inset-0 bg-gradient-to-b from-blue-700/30 via-transparent to-transparent animate-gradient-y animation-delay-2000"></div>
         
         {/* Moving clouds effect */}

@@ -110,7 +110,7 @@ const MonthlyEmotions = ({ onClose }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100]">
             <div className="relative w-full max-w-4xl bg-gradient-to-br from-gray-900/90 to-gray-800/90 rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
                 {/* Decorative elements */}
                 <div className="absolute top-0 -right-10 w-40 h-40 bg-orange-500/20 rounded-full blur-3xl" />
