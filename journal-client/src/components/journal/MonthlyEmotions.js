@@ -122,7 +122,7 @@ const MonthlyEmotions = ({ onClose }) => {
                     <button
                         onClick={onClose}
                         className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white 
-                                 bg-white/5 hover:bg-white/10 rounded-lg transition-colors duration-200"
+                                bg-white/5 hover:bg-white/10 rounded-lg transition-colors duration-200 z-[101]"
                     >
                         <X size={20} />
                     </button>
