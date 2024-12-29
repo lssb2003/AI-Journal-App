@@ -110,7 +110,7 @@ function JournalList() {
 
   return (
     <div className="w-full max-w-4xl mx-auto">
-      <h2 className="text-3xl font-bold text-center text-orange-900 mb-8">Your Journal</h2>
+      <h2 className="text-3xl font-bold text-center text-[#2b4975] mb-8">Your Journal</h2>
 
       {message && (
         <div className={`mb-6 p-4 rounded-lg ${
