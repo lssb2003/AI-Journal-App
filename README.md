@@ -1,9 +1,19 @@
 # JotBot - AI-Enhanced Journal Application
 
-## Overview
+## 📑 Table of Contents
+- [Overview](#overview)
+- [Features](#features)
+- [Local Development Setup](#local-development-setup)
+- [Production Deployment](#production-development)
+- [Maintenance](#maintenance)
+- [License](#license)
+- [Contributing](#contributing)
+- [Live demo](#live-demo)
+
+<h2 id="overview">Overview</h2>
 JotBot is a personal journaling application that enhances your journal entries using artificial intelligence. Write your thoughts naturally, and our AI will help improve and expand your entries while maintaining your original meaning.
 
-## Features
+<h2 id="features">Features</h2>
 - **User Authentication**
   - Secure registration and login system
   - Email-based password reset functionality
@@ -19,7 +29,7 @@ JotBot is a personal journaling application that enhances your journal entries u
   - Secure session handling
   - Protected API endpoints
 
-## Local Development Setup
+<h2 id="local-development-setup">Local Development Setup</h2>
 
 ### Prerequisites
 - Ruby 3.1.2
@@ -96,7 +106,7 @@ REACT_APP_API_URL=http://localhost:3001
 npm start
 ```
 
-## Production Deployment (AWS EC2)
+<h2 id="production-development">Production Deployment (AWS EC2)</h2>
 
 ### Prerequisites
 - AWS account with EC2 access
@@ -230,7 +240,7 @@ cd /var/www/journal-app
 RAILS_ENV=production rails s -p 3001 -d
 ```
 
-## Maintenance
+<h2 id="maintenance">Maintenance</h2>
 
 ### Updating Application
 ```bash
@@ -265,12 +275,15 @@ For any issues or questions, please:
 3. Ensure all services are running
 4. Create an issue in the GitHub repository
 
-## Contributing
+<h2 id="contributing">Contributing</h2>
 1. Fork the repository
 2. Create your feature branch
 3. Commit your changes
 4. Push to the branch
 5. Create a Pull Request
 
-## License
+<h2 id="license">License</h2>
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+<h2 id="live-demo">Live demo</h2>
+The application is deployed and can be accessed at: http://18.136.119.14
